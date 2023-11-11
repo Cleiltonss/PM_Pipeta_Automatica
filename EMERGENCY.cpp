@@ -1,5 +1,6 @@
 #include "mbed.h"
 #include "EMERGENCY.h"
+#include "IHM.h"
 
 void flip() {
     

@@ -2,12 +2,21 @@
 #include "JOG.h"
 #include "REFERENCING.h"
 #include "AUT_PEPETTING.h"
+#include "IHM.h"
+
 
 // BOTÕES: blue, green and red
-DigitalOut button_b(D3);
-DigitalOut button_g(D3);
-DigitalOut button_r(D3); 
+InterruptIn button_b(D3); // botão de speed: normal e rapida
+DigitalOut button_g(D3, 0); // botão de confirmação
+DigitalOut button_r(D3, 0);  // botão de retorno
 InterruptIn button_emerg(D11); // Botão de EMERGÊNCIA
+
+// LEDS: blue, red and yellow
+DigitalOut LED_B(D3, 0); // operação de definição de posições
+DigitalOut LED_G(D3, 0); // Finalização de cada operação
+DigitalOut LED_Y(D3, 0); // Referenciamento
+DigitalOut LED_R(D3, 0); // Processo automático de pipetagem 
+DigitalOut LED_R_EMERG(D3); // led vermelho para o estado de emergência
 
 
 // REFERENCIAMENTO
@@ -24,81 +33,73 @@ AnalogIn xAxis(A0);
 AnalogIn yAxis(A1);
 
 
-// MOTORES:  MOTOR1 - x , MOTOR2 - y , MOTOR3 - z
-PwmOut MOTOR1_CLK(D5, 0);
-PwmOut MOTOR2_CLK(D9, 0);
-PwmOut MOTOR3_CLK(D11, 0);
-DigitalOut MOTOR1_CW(D6, 0);
-DigitalOut MOTOR2_CW(D9, 0);
-DigitalOut MOTOR3_CW(D8, 0);
-DigitalOut MOTOR_EN(D7, 1);
-// Contadores de posicionamentos para cada eixo
-int xcount = 0;
-int ycount = 0;
-int zcount = 0;
-// Velocidade dos motores
-float velocity = 0.01;
+// MOTORES:  MOTOR1 - x , MOTOR2 - y, MOTOR3 - z
+PwmOut MOTOR_CLK(D6);
+DigitalOut MOTOR1_CW(D7, 0);
+DigitalOut MOTOR2_CW(D8, 0);
+DigitalOut MOTOR1_EN(D4, 1);
+DigitalOut MOTOR2_EN(D5, 1);
 
+
+BusOut MOTOR3(D3, D4, D5, D6); 
+
+
+// valor utilizado nas etapas de JOG para coleta de dados de pipetagem
+int step_jog = 0; // Define em que passo do processo de coleta ou posicionamento de pipetagem estará
 
 // Definindo lista para o ponto de Coleta e frasco de Pipetagem
 int pCollect[4]; 
 int pPepet[9][4];
-int hc; // Define altura de coleta
-int n_frascos; // Define o número de frascos que serão pipetados
-int vp; // Define o total de volume no frasco
+
+int n_frascos = 0; // Define o número de frascos que serão pipetados
 
 
-// Variáveis para o relé
-DigitalOut rele(D11);
+// Variável de acionamento do relé
+DigitalOut rele(D11, 0); // 0 : desligado
 
+// Define velocidade do motor
+float speed = 0;
+
+void normal_speed() {
+    speed = 0.01;
+}
+
+void high_speed() {
+    speed = 0.02;
+}
 
 
 int main() {
-    
+    printf("DEU CERTO!\n");
+    // Define period dos motores - botão azul regula 
+    button_b.fall(&high_speed);
+    button_b.rise(&normal_speed);
+
     // Motores
-    MOTOR1_CLK.write(0.5); // Duty cicle para 50%
-    MOTOR2_CLK.write(0.5); // Duty cicle para 50%
-    MOTOR3_CLK.write(0.5); // Duty cicle para 50%
     DigitalIn fdc[3][2] = {{fdcx1, fdcx2}, {fdcy1, fdcy2},  {fdcz1, fdcz2}}; // Lista que armazena os valores de cada fdc para cada eixo
-    int position[3] = {xcount, ycount, zcount}; // Alterar no código
-
-    // Botões
-    button_b = 0;
-    button_g = 0;
-    button_r = 0;
-
-
-    // variável de volume de pipetagem
-    vp = 0;
-    // Número total de frascos
-    n_frascos = 0;
-
-
-    // Variável de acionamento do relé
-    rele = 0; // desligado
-
+    int position[3] = {0, 0, 0}; 
 
     
     while (1) {
-        REFERENCING(fdc,
-                    MOTOR1_CLK, MOTOR2_CLK, MOTOR3_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR_EN,
-                    position);
+        // REFERENCING(fdc, position, &speed,
+        //             MOTOR1_CLK, MOTOR2_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR_EN, MOTOR3,
+        //             button_g,
+        //             LED_Y);
         
-        /*JOG(xAxis, yAxis, 
-            MOTOR, 
-            &xcount, &ycount, &zcount,
+        JOG(xAxis, yAxis, 
+            MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3, 
+            position, &step_jog, &speed,
             button_b, button_g, button_r,
             pCollect, pPepet,
-            &vp, &n_frascos, &velocity, &hc
+            &n_frascos
             );
+        
+        // AUT_PEPETTING(&n_frascos, pCollect, pPepet, position, 
+        //               MOTOR1_CLK, MOTOR2_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR_EN, MOTOR3,
+        //               rele);
+        
 
-        AUT_PEPETTING(&n_frascos, pCollect, pPepet, &velocity, &xcount, &ycount, &zcount,
-                      MOTOR1_CLK, MOTOR1_CW, 
-                      MOTOR2_CLK, MOTOR2_CW, 
-                      MOTOR3_CLK, MOTOR3_CW, 
-                      MOTOR_EN,
-                      rele);
-        */
+        // IHM(LED_R, button_g);
     }
         
 }

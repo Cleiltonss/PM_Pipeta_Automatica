@@ -3,12 +3,16 @@
 #include "mbed.h"
 
 
+void normal_velocity();
+void speed_velocity();
+
+
 void JOG(AnalogIn xAxis, AnalogIn yAxis,
-        DigitalOut MOTOR[][2],
-        int *xcount, int *ycount, int *zcount,
-        DigitalOut button_b, DigitalOut button_g, DigitalOut button_r,
+        PwmOut MOTOR_CLK, DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, BusOut MOTOR3,
+        int position[3], int *step_jog, float *speed,
+        InterruptIn button_b, DigitalOut button_g, DigitalOut button_r,
         int pCollect[4], int pPepet[][4],
-        int *vp, int *n_frascos, float *velocity, int *hc);
+        int *n_frascos);
 
 #endif
 
