@@ -6,11 +6,13 @@
 // mensagens de referenciamento
 void start_ref(DigitalOut button_g, DigitalOut LED_Y);
 // void during_ref(DigitalOut LED_Y);
-void end_ref();
+void end_ref(DigitalOut LED_G);
 
 
 // mensagens de ponto de coleta
 void start_pCollect();
+
+
 void end_pCollectXY();
 void end_pCollectZ();
 void start_pCollectH();

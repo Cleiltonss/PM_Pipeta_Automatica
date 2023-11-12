@@ -3,8 +3,8 @@
 #include "mbed.h"
 
 
-void AUT_PEPETTING(int *n_frascos, int pCollect[3], int pPepet[][4], int position[3], float *speed,
-                   PwmOut MOTOR1_CLK, PwmOut MOTOR2_CLK, DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR_EN, BusOut MOTOR3,
+void AUT_PEPETTING(int *n_frascos, int pCollect[3], int pPepet[][4], int position[3], 
+                   PwmOut MOTOR_CLK, DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, 
                    DigitalOut rele); 
 
 #endif
