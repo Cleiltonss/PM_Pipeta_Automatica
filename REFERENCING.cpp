@@ -4,7 +4,7 @@
 
 void REFERENCING(DigitalIn fdc[][2], int position[3], float *speed,
                  PwmOut MOTOR_CLK, DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, 
-                 DigitalOut button_g,
+                 DigitalIn button_g,
                  DigitalOut LED_Y, DigitalOut LED_G) {
 
                     
@@ -13,7 +13,8 @@ void REFERENCING(DigitalIn fdc[][2], int position[3], float *speed,
                     
                     MOTOR_CLK.write(0.5); // Duty cicle para 50%
                     MOTOR_CLK.period(*speed); // *speed inicial igual a 0.01
-
+                    
+                    dur_ref();
                     if (button_g == 0) {
                         printf("\rVERDE PRESSIONADO!\n");
                         for (int i = 0; i < 3; i++) {
@@ -75,7 +76,8 @@ void REFERENCING(DigitalIn fdc[][2], int position[3], float *speed,
                         }
                     }
                     
-                    // end_ref(LED_Y, LED_G);
+                    end_ref(LED_Y, LED_G);
+                    
                     // zeramento de variáveis no referenciamento
 
                     MOTOR_CLK.write(0);

@@ -4,13 +4,12 @@
 #include "AUT_PEPETTING.h"
 #include "IHM.h"
 
-
 Serial pc(USBTX, USBRX); // Declara o objeto pc para comunicação serial nativo
 
 // BOTÕES: blue, green and red
-InterruptIn button_b(D4); // botão de speed: normal e rapida - TA COM PROBLEMA NA COMUNICAÇÃO DE ARQUIVOS
-DigitalOut button_g(D3, 0); // botão de confirmação: 0 -> valor pressionado
-DigitalOut button_r(D10, 0);  // botão de retorno
+InterruptIn button_b(D3); // botão de speed: normal e rapida - TA COM PROBLEMA NA COMUNICAÇÃO DE ARQUIVOS
+DigitalIn button_g(D10); // botão de confirmação: 0 -> valor pressionado
+DigitalIn button_r(D10);  // botão de retorno
 InterruptIn button_emerg(D11); // Botão de EMERGÊNCIA
 
 // LEDS: blue, red and yellow
@@ -40,8 +39,8 @@ AnalogIn yAxis(A1);
 PwmOut MOTOR_CLK(D6);
 DigitalOut MOTOR1_CW(D7, 0);
 DigitalOut MOTOR2_CW(D8, 0);
-DigitalOut MOTOR1_EN(D4, 1);
-DigitalOut MOTOR2_EN(D5, 1);
+DigitalOut MOTOR1_EN(D4);
+DigitalOut MOTOR2_EN(D5);
 // BusOut MOTOR3(D3, D4, D5, D6);  - ESTÁ COM ALGUM PROBLEMA!
 
 
@@ -59,27 +58,30 @@ int n_frascos = 0; // Define o número de frascos que serão pipetados
 // Variável de acionamento do relé
 DigitalOut rele(D11, 0); // 0 : desligado
 
-//********************************************************BOTÃO DE SPEED*******************************************
 
-// Define velocidade do motor
+
+//********************************************************SPEED DO MOTOR*******************************************
+// Define velocidade do motor. Quando o botão azul é apertado - button_b - a velocidade é aumentada em x2
 float speed = 0.01;
 
 void normal_speed() {
     speed = 0.01;
 }
-
 void high_speed() {
-    speed = 0.02;
+    speed = 0.002;
 }
-//********************************************************BOTÃO DE SPEED********************************************
+//********************************************************SPEED DO MOTOR********************************************
 
 
 
 int main() {
 
-    // Define period dos motores - botão azul pressionado aumenta a velocidade e, ao soltar, retorna a velocidade original
+    // Define periodo dos motores - botão azul pressionado aumenta a velocidade e, ao soltar, retorna a velocidade original
     button_b.fall(&high_speed);
     button_b.rise(&normal_speed);
+
+    MOTOR1_EN = 1;
+    MOTOR2_EN = 1;
 
     // variáveis estados iniciais
     LED_B = 0;
@@ -90,23 +92,22 @@ int main() {
 
     // Motores
     DigitalIn fdc[3][2] = {{fdcx1, fdcx2}, {fdcy1, fdcy2},  {fdcz1, fdcz2}}; // Lista que armazena os valores de cada fdc para cada eixo
-    int position[3] = {0, 0, 0}; 
-    int i = 0;
-    while (i < 1) {
+    int position[3] = {0, 0, 0};
+    while (1) {
         
         // REFERENCING(fdc, position, &speed,
         //             MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR1_EN, MOTOR2_EN, 
         //             button_g,
         //             LED_Y, LED_G);
         
-        // JOG(xAxis, yAxis, 
-        //     MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR1_EN, MOTOR2_EN,  
-        //     position, &step_jog, &speed,
-        //     button_g, 
-        //     pCollect, pPepet,
-        //     &n_frascos
-        //     );
-        i++;
+        JOG(xAxis, yAxis, 
+            MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR1_EN, MOTOR2_EN,  
+            position, &step_jog, &speed,
+            button_g, 
+            LED_B, LED_G,
+            pCollect, pPepet,
+            &n_frascos
+            );
         // // printf("SAI DO JOG!");
         // AUT_PEPETTING(&n_frascos, pCollect, pPepet, position, 
         //               MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR1_EN, MOTOR2_EN,

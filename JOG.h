@@ -10,7 +10,8 @@
 void JOG(AnalogIn xAxis, AnalogIn yAxis,
         PwmOut MOTOR_CLK, DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, 
         int position[3], int *step_jog, float *speed,
-        DigitalOut button_g, 
+        DigitalIn button_g,
+        DigitalOut LED_B, DigitalOut LED_G,
         int pCollect[4], int pPepet[][4],
         int *n_frascos);
 

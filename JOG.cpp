@@ -2,14 +2,12 @@
 #include "IHM.h"
 
 
-
-
-
 // joystick + coleta de dados para pipetagem
 void JOG(AnalogIn xAxis, AnalogIn yAxis,
          PwmOut MOTOR_CLK, DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, 
          int position[3], int *step_jog, float *speed,
-         DigitalOut button_g, 
+         DigitalIn button_g, 
+         DigitalOut LED_G, DigitalOut LED_B,
          int pCollect[4], int pPepet[][4],
          int *n_frascos) 
          {
@@ -25,19 +23,21 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
             MOTOR_CLK.write(0.5); // Duty Cicle em 50%
             MOTOR_CLK.period(*speed); // MOTOR_CLK.period(speed); NÃO FUNCIONA
             while (leave_cp == true) {    
+                // printf("\nTA DENTRO!\n");
                 if (switchz == 0) {
                     // Valores do joystick
                     joystick[0] = xAxis.read() * 1000; // float (0->1) to int (0->1000)
                     joystick[1] = yAxis.read() * 1000;
                     joystick[2] = 0;
 
+                    printf("\nX= %i, Y= %i\n", joystick[0], joystick[1]);
                     // Movimentação do JOYSTICK com interpolação de eixos
 
                     // sem movimento
                     if (joystick[0] < 550 && joystick[0] > 450 && joystick[1] < 550 && joystick[1] > 450) {
                         MOTOR1_EN = 1;
                         MOTOR2_EN = 1;
-                        // printf("\rX e Y PARADOS!\n\n");
+                        printf("\nX e Y PARADOS!\n");
                     }
                     
                     // movimento leste
@@ -47,7 +47,7 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                         MOTOR1_EN = 0;
                         MOTOR1_CW = 0;
                         position[0]++;
-                        // printf("\rDIREITA!\n\n");
+                        printf("\nDIREITA!\n");
                     }
 
                     // movimento oeste
@@ -57,7 +57,7 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                         MOTOR1_EN = 0; 
                         MOTOR1_CW = 1;
                         position[0]--;
-                        // printf("\rESQUERDA!\n\n");
+                        printf("\rESQUERDA!\n\n");
                     }
 
                     // movimento norte
@@ -161,7 +161,7 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
 
                     if (*step_jog == 2) {
                         // printf("\rPASSO 2!\n\n");
-                        //end_pCollectZ();
+                        end_pCollectZ(button_g, LED_B, LED_G);
                         pCollect[2] = position[2];
 
                         // É necessário zerar a contagem para as novas medidas dos frascos
@@ -181,44 +181,32 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                     }
                 }
 
-                // Entrada dos passos de coleta e altura do frascos de coleta para pipetagem 
-                if (button_g == 0) {
+                // // Entrada dos passos de coleta e altura do frascos de coleta para pipetagem 
+                if (button_g == 1) {
                     if (*step_jog == 0) {
                         // printf("\rPASSO 0!\n\n");
-                        start_pCollect();
+                        start_pCollect(button_g, LED_B, LED_G);
                     }
 
                     // Salva posições xy de coleta
                     if (*step_jog == 1) {
                         // printf("\rPASSO 1!\n\n");
-                        //end_pCollectXY();
+                        end_pCollectXY(button_g, LED_B,LED_G);
                         pCollect[0] = position[0];
                         pCollect[1] = position[1];
                         switchz = 1;
                     }
 
+                    // Salva a altura do ponto de coleta
                     if (*step_jog == 3) {
                         // printf("\rPASSO 3!\n\n");
-                        //start_pCollectH();
-                        joystick[0] = 0;
-                        joystick[1] = yAxis.read() * 1000;
-                        joystick[2] = 0; 
-
-                        // Deslocamento - y cima
-                        if (joystick[1] > 550) {
-                            position[1] = position[1] + 1;
-                        }
-
-                        // Deslocamento - y baixo
-                        if (joystick[1] < 450 && position[1] > 0) {
-                            position[1] = position[1] - 1;
-                        }
+                        start_pCollectH(position, button_g, LED_B);
                     }
 
                     if (*step_jog == 4) {
                         // printf("\rPASSO 4!\n\n");
                         pCollect[3] = position[1]; // armazenou aqui o valor final para ter tudo de posição da COLETA
-                        //end_pCollectH();
+                        end_pCollectH();
                         position[1] = 0;
                     }
 
@@ -275,8 +263,9 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                             }
                         }
                     }
-                    wait(1); // Controll Time to each time that the green button is press
                     *step_jog = *step_jog + 1; 
+                    wait(1); // Controll Time to each time that the green button is press
+
                 }
   
                 
@@ -287,8 +276,7 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                 } 
                 
             }
-      
-         printf("\rJOG CONCLUIDO!\n\n");   
+       
          }
 
 
