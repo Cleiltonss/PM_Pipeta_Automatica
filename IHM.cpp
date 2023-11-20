@@ -5,6 +5,10 @@
 MCUFRIEND_kbv tft; 
 #include "TouchScreen_kbv_mbed.h"
 
+// //para o carregamento
+// #include <iostream>
+// #include <cmath>
+
 //******************************Configuração do Display***********************//
 const PinName XP = D8, YP = A3, XM = A2, YM = D9; 
 const int TS_LEFT=121,TS_RT=922,TS_TOP=82,TS_BOT=890;
@@ -102,9 +106,38 @@ void clean_start_pCollectH() {
 }
 
 
+// Função para limpar a tela
+void clean_start_FlaskH() {
 
+    tft.fillScreen(PINK);
+    
+    // BOTÕES DE + e -
+    tft.fillCircle(60,180,40,GREEN); // X, Y, Raio, COR
+    tft.setTextColor(WHITE);
+    tft.setTextSize(4);
+    tft.setCursor(50, 167); // Orientação X,Y
+    tft.println("+");
 
+    tft.fillCircle(230,180,40,RED);
+    tft.setTextColor(WHITE);
+    tft.setTextSize(4);
+    tft.setCursor(220, 167); // Orientação X,Y
+    tft.println("-");
 
+    // retângulo mensagem: PRESSIONE VERDE
+    tft.fillRoundRect(18, 50, 281, 60, 1, BLUE); // (x,y,x1,y1,s)
+    tft.setTextColor(WHITE);
+    tft.setTextSize(3);
+    tft.setCursor(60, 60); // Orientação X,Y
+    tft.println("VALUE: ");
+}
+
+void clean_start_FlaskPosition() {
+    tft.setTextColor(PINK);
+    // retângulo mensagem: PRESSIONE VERDE
+    tft.fillRoundRect(15, 57, 287, 72, 3, RED); // (x,y,x1,y1,s) : EFEITO DE BORDA
+    tft.fillRoundRect(18, 67, 281, 86, 1, BLACK); // (x,y,x1,y1,s)
+}
 
 
 //**********************************************************REFERENCING******************************************************///
@@ -347,7 +380,7 @@ void start_pCollect(DigitalIn button_g, DigitalOut LED_B, DigitalOut LED_G) {
 
 
 
-void end_pCollectXY(DigitalIn button_g, DigitalOut LED_B, DigitalOut LED_G) {
+void end_pCollectXY(DigitalIn button_g, DigitalOut LED_B) {
     clean();      
 
     tft.fillRoundRect(10, 40, 300, 50, 1, BLACK);
@@ -365,15 +398,11 @@ void end_pCollectXY(DigitalIn button_g, DigitalOut LED_B, DigitalOut LED_G) {
     tft.println("PRESSIONE VERDE");
     flasher(button_g, LED_B);
 
-    // valores contínuos para os dois leds
-    LED_B = 0;
-    LED_G = 1;
 }
 
-void end_pCollectZ(DigitalIn button_g, DigitalOut LED_B, DigitalOut LED_G) {
+void end_pCollectZ(DigitalIn button_g, DigitalOut LED_B) {
     clean();
 
-    LED_G = 0;
     // mensagem: DEFINIDO PONTO Z
     tft.fillRoundRect(10, 40, 300, 50, 1, BLACK);
     tft.setTextColor(RED);
@@ -406,8 +435,9 @@ void start_pCollectH(int position[3], DigitalIn button_g, DigitalOut LED_B) {
     tft.setTextSize(3);
     tft.setCursor(110, 150); // Orientação X,Y
     tft.println("COLETA");
-
     // Primeira parte - Tela 1
+
+
     delay(2000);
 
     clean_start_pCollectH();
@@ -492,8 +522,8 @@ void start_pCollectH(int position[3], DigitalIn button_g, DigitalOut LED_B) {
     }
 }
 
-//////// TO AQUI!!! AINDA NÃO COMECEI!
-void end_pCollectH() {
+
+void end_pCollectH(DigitalIn button_g, DigitalOut LED_B, DigitalOut LED_G) {
     clean();
 
     //mensagem: ALTURA DEFINIDA
@@ -510,13 +540,19 @@ void end_pCollectH() {
     tft.setTextSize(2);
     tft.setCursor(70, 155); // Orientação X,Y
     tft.println("PRESSIONE VERDE");
+
+    flasher(button_g, LED_B);
+
+    LED_B = 0;
+    LED_G = 1;
 }
 
 
 
-// Selecionar o número total de frascos para pipetagem - TELA TOUCHSCREEN - FEITO
-void start_NumFlask(DigitalOut button_g, int *n_frascos) {
-    
+// Selecionar o número total de frascos para pipetagem - TELA TOUCHSCREEN - FEITO - A LÓGICA COM O *n_frascos PODE ESTAR ERRADA! VERIFICAR!
+void start_NumFlask(DigitalIn button_g, int *n_frascos, DigitalOut LED_B, DigitalOut LED_G) {
+    LED_G = 0;
+
     // BOTÕES DE + e -
     tft.fillCircle(60,180,40,GREEN); // X, Y, Raio, COR
     tft.setTextColor(WHITE);
@@ -543,8 +579,8 @@ void start_NumFlask(DigitalOut button_g, int *n_frascos) {
     tft.setTextSize(3);
     tft.printf("\r%i", *n_frascos);
 
-    bool state = true;
-    while (state == true) {
+
+    while (1) {
 
          // numero total de frascos
         tp = ts.getPoint();
@@ -557,7 +593,7 @@ void start_NumFlask(DigitalOut button_g, int *n_frascos) {
         // tft.printf("tp.x=%d tp.y=%d   ", tp.x, tp.y); // Faz leitura dos valores de xy quando se pressiona o touchscreen
         // printf("\rtp.x=%d tp.y=%d\n   ", tp.x, tp.y);
         
-        
+        // botão vermelho no display: subtrair
         if(tp.x < 320 && tp.x > 300 && tp.y > 610 && tp.y < 650) {
             clean_start_NumFlask();
             if (*n_frascos > 0) {
@@ -570,7 +606,7 @@ void start_NumFlask(DigitalOut button_g, int *n_frascos) {
             tft.printf("\r%i", *n_frascos);
         }
 
-        // botão verde: adicionar
+        // botão verde no display: adicionar
         if(tp.x < 345 && tp.x > 335 && tp.y > 200 && tp.y < 220) {
             clean_start_NumFlask();
             if (*n_frascos < 9 && *n_frascos >= 0) {
@@ -583,36 +619,182 @@ void start_NumFlask(DigitalOut button_g, int *n_frascos) {
             tft.printf("\r%i", *n_frascos);
         }
 
-        if (button_g == 1) {
-            state = false;
+
+        // pisca-pisca LED AZUL
+        if (button_g == 0) {
+            LED_B = 1;
+        } else {
+            LED_B = 1;
+            break;
         }
+        wait(0.1);
+
+        if (button_g == 0) {
+            LED_B = 0;
+        } else {
+            LED_B = 1;
+            break;
+        }
+        wait(0.1);
     }
 }
-// Selecionar o número total de frascos para pipetagem - TELA TOUCHSCREEN - FEITO
+// Selecionar o número total de frascos para pipetagem - TELA TOUCHSCREEN - FEITO - verifica lógica com o *n_frascos
 
 
 
 
-void start_FlaskH() {
-    // clean();
-    // // mensagem: DEFINIR VALOR DE VOLUME: {EMITIR VALOR DO VOLUME} mL
-    // tft.setTextColor(BLACK);
-    // tft.setTextColor(RED);
-    // tft.setCursor(110, 40);
-    // tft.println("DEFINIR VALOR DE VOLUME: {EMITIR VALOR DO VOLUME} mL");
-    // delay(2000);  
-    // clean();
+int start_FlaskH(int value, DigitalIn button_g, DigitalOut LED_B) {
+
+    // mensagem: Salvar XY para Frascos
+    tft.setTextSize(3);
+    tft.setTextColor(PINK);
+    tft.setTextColor(DARKCYAN);
+    tft.setCursor(80, 20);
+    tft.println("Salvar H");
+    tft.setCursor(130, 50);
+    tft.println("para");
+    tft.setCursor(100, 75);
+    tft.setTextColor(RED);
+    tft.println("Frascos");
+    wait(1);
+
+    // retângulo mensagem: PRESSIONE VERDE
+    tft.fillRoundRect(15, 107, 287, 122, 3, GREEN); // (x,y,x1,y1,s) : EFEITO DE BORDA
+    tft.fillRoundRect(18, 110, 281, 116, 1, DARKGREEN); // (x,y,x1,y1,s)
+    tft.setTextColor(WHITE);
+    tft.setTextSize(2);
+    tft.setCursor(75, 155); // Orientação X,Y
+    tft.println("PRESSIONE VERDE"); 
+    
+    wait(3);
+    clean_start_FlaskH();
+
+
+    // BOTÕES DE + e -
+    tft.fillCircle(60,180,40,GREEN); // X, Y, Raio, COR
+    tft.setTextColor(WHITE);
+    tft.setTextSize(4);
+    tft.setCursor(50, 167); // Orientação X,Y
+    tft.println("+");
+
+    tft.fillCircle(230,180,40,RED);
+    tft.setTextColor(WHITE);
+    tft.setTextSize(4);
+    tft.setCursor(220, 167); // Orientação X,Y
+    tft.println("-");
+    
+
+    tft.fillRoundRect(18, 50, 260, 60, 1, BLUE); // (x,y,x1,y1,s)
+    tft.setTextColor(WHITE);
+    tft.setTextSize(3);
+    tft.setCursor(60, 60); // Orientação X,Y
+    tft.println("VALUE: ");
+
+    tft.setCursor(200, 60);
+    tft.setTextColor(MAGENTA);
+    tft.setTextSize(3);
+    tft.printf("\r%i", value);
+
+
+    while (1) {
+
+         // numero total de frascos
+        tp = ts.getPoint();
+        YPout.output();
+        XMout.output(); 
+        
+        // tft.setTextSize(2);
+        // tft.setTextColor(MAGENTA,BLACK);
+        // tft.setCursor(0, 0);
+        // tft.printf("tp.x=%d tp.y=%d   ", tp.x, tp.y); // Faz leitura dos valores de xy quando se pressiona o touchscreen
+        // printf("\rtp.x=%d tp.y=%d\n   ", tp.x, tp.y);
+        
+        // botão vermelho no display: subtrair
+        if(tp.x < 320 && tp.x > 300 && tp.y > 610 && tp.y < 650) {
+            clean_start_FlaskH();
+            if (value > 0) {
+                value--;
+            }
+
+            tft.setCursor(200, 60);
+            tft.setTextColor(MAGENTA);
+            tft.setTextSize(3);
+            tft.printf("\r%i", value);
+        }
+
+        // botão verde no display: adicionar
+        if(tp.x < 345 && tp.x > 335 && tp.y > 200 && tp.y < 220) {
+            clean_start_FlaskH();
+            value++;
+
+            tft.setCursor(200, 60);
+            tft.setTextColor(MAGENTA);
+            tft.setTextSize(3);
+            tft.printf("\r%i", value);
+        }
+
+        // pisca-pisca LED AZUL
+        if (button_g == 0) {
+            LED_B = 1;
+        } else {
+            LED_B = 1;
+            break;
+        }
+        wait(0.1);
+
+        if (button_g == 0) {
+            LED_B = 0;
+        } else {
+            LED_B = 1;
+            break;
+        }
+        wait(0.1);
+
+    }
+
+    return value;
 }
 
-void start_FlaskPosition() {
-    // clean();
-    // // mensagem: DEFINIR POSIÇÃO XY: {EMITIR VALOR DO VOLUME}
-    // tft.setTextColor(BLACK);
-    // tft.setTextColor(RED);
-    // tft.setCursor(110, 40);
-    // tft.println("DEFINIR POSIÇÃO XY: {EMITIR VALOR DO VOLUME}");
-    // delay(2000);  
-    // clean();
+
+//////// TO AQUI!!! 
+void start_FlaskPosition(float X, float Y) {
+    int pass = 0;
+    if (pass == 0) {
+        // mensagem: Salvar XY para Frascos
+        tft.setTextSize(3);
+        tft.setTextColor(PINK);
+        tft.setTextColor(DARKCYAN);
+        tft.setCursor(80, 20);
+        tft.println("Salvar XY");
+        tft.setCursor(130, 50);
+        tft.println("para");
+        tft.setCursor(100, 75);
+        tft.setTextColor(RED);
+        tft.println("Frascos");
+        wait(1);
+
+        // retângulo mensagem: PRESSIONE VERDE
+        tft.fillRoundRect(15, 107, 287, 122, 3, GREEN); // (x,y,x1,y1,s) : EFEITO DE BORDA
+        tft.fillRoundRect(18, 110, 281, 116, 1, DARKGREEN); // (x,y,x1,y1,s)
+        tft.setTextColor(WHITE);
+        tft.setTextSize(2);
+        tft.setCursor(75, 155); // Orientação X,Y
+        tft.println("PRESSIONE VERDE"); 
+        
+        wait(3);
+        pass++;
+    } else {
+        clean_start_FlaskPosition();
+        // retângulo mensagem: PRESSIONE VERDE
+        tft.fillRoundRect(15, 57, 287, 72, 3, RED); // (x,y,x1,y1,s) : EFEITO DE BORDA
+        tft.fillRoundRect(18, 67, 281, 86, 1, BLACK); // (x,y,x1,y1,s)
+        tft.setTextColor(WHITE);
+        tft.setTextSize(2);
+        tft.setCursor(75, 65); // Orientação X,Y
+        tft.printf("DESLOCAMENTO X: %1.3f", X);
+        tft.setCursor(75, 75); // Orientação X,Y
+        tft.printf("DESLOCAMENTO Y: %1.3f", Y); 
+    }
 }
 
 
@@ -623,16 +805,68 @@ void start_FlaskPosition() {
 
 
 
-// // BOTÕES DE + e -
-//     tft.fillCircle(60,180,40,GREEN); // X, Y, Raio, COR
-//     tft.setTextColor(WHITE);
-//     tft.setTextSize(4);
-//     tft.setCursor(50, 167); // Orientação X,Y
-//     tft.println("+");
 
-//     tft.fillCircle(260,180,40,RED);
+
+
+// void clean_start_LOAD() {
+//     tft.fillScreen(PINK);  // Fundo do Display - Fundo da tela
+//     tft.drawCircle(150,110,80,WHITE);
 //     //tft.fillCircle(150,110,80,WHITE);
-//     tft.setTextColor(WHITE);
-//     tft.setTextSize(4);
-//     tft.setCursor(250, 167); // Orientação X,Y
-//     tft.println("-");
+
+    
+// }
+
+
+
+// void start_LOAD() {
+    
+
+
+
+//     tft.drawCircle(150,110,80,WHITE);
+//     //tft.fillCircle(150,110,80,WHITE);
+//     tft.setTextColor(RED);
+//     tft.setTextSize(3);
+//     tft.setCursor(95, 98); // Orientação X,Y
+//     tft.println("CIRCLE");
+
+
+    
+
+
+
+//     float x, y = 0;
+//     int R = 80;
+//     int n = 1; // número de voltas 
+//     int T = 3; // controla a velocidade do ponto
+//     for (int i = 0; i < 360 * n; i++) {
+//         clean_start_LOAD();
+
+//         // incremento por passada em radianos
+//         double angulo = T * (i * 3.141593 / 180); // em radianos
+
+//         // coordenadas
+//         x = R * cos(angulo);
+//         y = R * sin(angulo);
+
+
+//         tft.fillCircle(150+x,110+y,1,BLACK);
+//         tft.fillCircle(150+x,111+y,1,BLACK);
+
+//         tft.fillCircle(151+x,110+y,1,BLACK);
+//         tft.fillCircle(151+x,111+y,1,BLACK);
+
+//         if (i == 120) {
+//             break;
+//         }
+//     }
+
+//     tft.setTextColor(RED);
+//     tft.setTextSize(3);
+//     tft.setCursor(95, 98); // Orientação X,Y
+//     tft.println("CIRCLE");
+
+    
+// }
+
+

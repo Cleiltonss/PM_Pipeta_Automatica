@@ -3,45 +3,53 @@
 #include "REFERENCING.h"
 #include "AUT_PEPETTING.h"
 #include "IHM.h"
+#include "EMERGENCY.h"
+
+
 
 Serial pc(USBTX, USBRX); // Declara o objeto pc para comunicação serial nativo
 
 // BOTÕES: blue, green and red
-InterruptIn button_b(D3); // botão de speed: normal e rapida - TA COM PROBLEMA NA COMUNICAÇÃO DE ARQUIVOS
-DigitalIn button_g(D10); // botão de confirmação: 0 -> valor pressionado
-DigitalIn button_r(D10);  // botão de retorno
-InterruptIn button_emerg(D11); // Botão de EMERGÊNCIA
+InterruptIn button_b(PB_14); // botão de speed: normal e rapida - TA COM PROBLEMA NA COMUNICAÇÃO DE ARQUIVOS
+DigitalIn button_g(D13); // botão de confirmação: 0 -> valor pressionado
+DigitalIn button_r(PB_15);  // botão de retorno
+InterruptIn button_emerg(PB_1); // Botão de EMERGÊNCIA
 
 // LEDS: blue, red and yellow
-DigitalOut LED_B(D10, 0); // Operação de definição de posições
-DigitalOut LED_G(D6, 0); // Finalização de cada operação
-DigitalOut LED_Y(D5, 0); // Referenciamento
-DigitalOut LED_R(D11, 0); // Processo automático de pipetagem 
-DigitalOut LED_R_EMERG(D3); // led vermelho para o estado de emergência
+DigitalOut LED_B(PB_2, 0); // Operação de definição de posições
+DigitalOut LED_G(PB_12, 0); // Finalização de cada operação
+DigitalOut LED_Y(PC_5, 0); // Referenciamento
+DigitalOut LED_R(PC_6, 0); // Processo automático de pipetagem 
+DigitalOut LED_R_EMERG(PC_8); // led vermelho para o estado de emergência
 
 
 
 // REFERENCIAMENTO
-DigitalIn fdcx1(D3); // fim de curso 1 no eixo x 
-DigitalIn fdcx2(D4); // fim de curso 2 no eixo x 
-DigitalIn fdcy1(D5); // fim de curso 1 no eixo y 
-DigitalIn fdcy2(D6); // fim de curso 2 no eixo x 
-DigitalIn fdcz1(D7); // fim de curso 1 no eixo z 
-DigitalIn fdcz2(D8); // fim de curso 2 no eixo z 
+DigitalIn fdcx1(PA_15); // fim de curso 1 no eixo x 
+DigitalIn fdcx2(PA_14); // fim de curso 2 no eixo x 
+DigitalIn fdcy1(PA_13); // fim de curso 1 no eixo y 
+DigitalIn fdcy2(PC_12); // fim de curso 2 no eixo x 
+DigitalIn fdcz1(PC_4); // fim de curso 1 no eixo z 
+DigitalIn fdcz2(PB_13); // fim de curso 2 no eixo z 
 
 
 // Definindo variáveis de leitura de posicionamento do JOYSTICK
-AnalogIn xAxis(A0);
-AnalogIn yAxis(A1);
+AnalogIn xAxis(PC_14);
+AnalogIn yAxis(PC_13);
 
 
 // MOTORES:  MOTOR1 - x , MOTOR2 - y, MOTOR3 - z
-PwmOut MOTOR_CLK(D6);
-DigitalOut MOTOR1_CW(D7, 0);
-DigitalOut MOTOR2_CW(D8, 0);
-DigitalOut MOTOR1_EN(D4);
-DigitalOut MOTOR2_EN(D5);
-// BusOut MOTOR3(D3, D4, D5, D6);  - ESTÁ COM ALGUM PROBLEMA!
+PwmOut MOTOR_CLK(D0);
+
+DigitalOut MOTOR1_EN(D1, 0);
+DigitalOut MOTOR1_CW(PC_3, 0);
+
+DigitalOut MOTOR2_EN(PC_2, 0);
+DigitalOut MOTOR2_CW(PC_15, 0);
+
+DigitalOut MOTOR3_EN(D11, 0);
+DigitalOut MOTOR3_CW(D12, 0);
+
 
 
 
@@ -56,7 +64,7 @@ int n_frascos = 0; // Define o número de frascos que serão pipetados
 
 
 // Variável de acionamento do relé
-DigitalOut rele(D11, 0); // 0 : desligado
+DigitalOut rele(D10, 0); // 0 : desligado, VAI TER OUTRO, PRESTAR ATENÇÃO!
 
 
 
@@ -65,20 +73,22 @@ DigitalOut rele(D11, 0); // 0 : desligado
 float speed = 0.01;
 
 void normal_speed() {
-    speed = 0.01;
+    speed = 0.05; // 100 hz: voltar para 0.01
 }
 void high_speed() {
-    speed = 0.002;
+    speed = 0.002; // 500 hz
 }
 //********************************************************SPEED DO MOTOR********************************************
 
 
 
 int main() {
-
     // Define periodo dos motores - botão azul pressionado aumenta a velocidade e, ao soltar, retorna a velocidade original
     button_b.fall(&high_speed);
     button_b.rise(&normal_speed);
+
+    // button_emerg.fall(EMERGENCY(LED_B, LED_G, LED_Y, LED_R, LED_R_EMERG,
+    //                             MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR1_EN, MOTOR2_EN));
 
     MOTOR1_EN = 1;
     MOTOR2_EN = 1;
@@ -93,21 +103,27 @@ int main() {
     // Motores
     DigitalIn fdc[3][2] = {{fdcx1, fdcx2}, {fdcy1, fdcy2},  {fdcz1, fdcz2}}; // Lista que armazena os valores de cada fdc para cada eixo
     int position[3] = {0, 0, 0};
+
+    MOTOR_CLK.write(0.5); // Duty cicle para 50%
+    MOTOR_CLK.period(speed); // *speed inicial igual a 0.01
+ 
+
     while (1) {
+        start_ref(button_g, LED_Y);
+        REFERENCING(fdc, position, &speed,
+                    MOTOR1_CW, MOTOR2_CW, MOTOR1_EN, MOTOR2_EN, 
+                    button_g,
+                    LED_Y, LED_G);
         
-        // REFERENCING(fdc, position, &speed,
-        //             MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR1_EN, MOTOR2_EN, 
-        //             button_g,
-        //             LED_Y, LED_G);
-        
-        JOG(xAxis, yAxis, 
-            MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR1_EN, MOTOR2_EN,  
-            position, &step_jog, &speed,
-            button_g, 
-            LED_B, LED_G,
-            pCollect, pPepet,
-            &n_frascos
-            );
+
+        // JOG(xAxis, yAxis, 
+        //     MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR1_EN, MOTOR2_EN, 
+        //     position, &step_jog, &speed,
+        //     button_g, 
+        //     LED_B, LED_G,
+        //     pCollect, pPepet,
+        //     &n_frascos
+        //     );
         // // printf("SAI DO JOG!");
         // AUT_PEPETTING(&n_frascos, pCollect, pPepet, position, 
         //               MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR1_EN, MOTOR2_EN,
