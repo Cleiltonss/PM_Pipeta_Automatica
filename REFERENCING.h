@@ -4,8 +4,10 @@
 
 
 void REFERENCING(DigitalIn fdc[][2], int position[3], float *speed, 
-                 DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, 
+                 PwmOut MOTOR_CLK, 
+                 DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR3_CW, 
+                 DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, DigitalOut MOTOR3_EN, 
                  DigitalIn button_g,
-                 DigitalOut LED_Y, DigitalOut LED_G); // movimenta no sentido horário e antihorário
+                 DigitalOut LED_Y, DigitalOut LED_G, DigitalIn fdcz1); // movimenta no sentido horário e antihorário
 
 #endif

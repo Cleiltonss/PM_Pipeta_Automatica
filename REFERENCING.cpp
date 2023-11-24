@@ -3,138 +3,98 @@
 
 
 void REFERENCING(DigitalIn fdc[][2], int position[3], float *speed,
-                 DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, 
+                 PwmOut MOTOR_CLK, 
+                 DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR3_CW, 
+                 DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, DigitalOut MOTOR3_EN, 
                  DigitalIn button_g,
-                 DigitalOut LED_Y, DigitalOut LED_G) {
+                 DigitalOut LED_Y, DigitalOut LED_G, DigitalIn fdcz1) {
+                    
+                    dur_ref();
+
                     
                     // eixo x
                     while(1) {
                         if (fdc[0][0] == 1 || fdc[0][1] == 1) {
-                                // printf("\rTA MOVENDO!\n");
+                                printf("\rTA MOVENDO X!\n");
                                 MOTOR1_EN = 0;
                                 MOTOR1_CW = 1;
                             } 
 
                         if (fdc[0][0] == 0 || fdc[0][1] == 0) {
-                            // printf("\rENTROU RETORNO!!\n");
+                            // printf("\rENTROU RETORNO X!\n");
                             while(1) {
                                 if (fdc[0][0] == 0 || fdc[0][1] == 0) {
-                                    // printf("\rTA RETORNANDO!\n");
+                                    printf("\rTA RETORNANDO X!\n");
                                     MOTOR1_EN = 0;
                                     MOTOR1_CW = 0;
                                 } else if (fdc[0][0] == 1 || fdc[0][1] == 1) {
-                                    // printf("\rSAIU DO RETORNO, ACABOU!\n");
+                                    printf("\rSAIU DO RETORNO X!\n");
                                     MOTOR1_EN = 1;
                                     break;
                                 } 
                                 
                             }
                             break;
-                        }
-                    
-                    
-                        
+                        }   
                     }
 
                     
+                    // eixo y
+                    while(1) {
+                        // printf("\rENTROU\n");
+                        if (fdc[1][0] == 1 || fdc[1][1] == 1) {
+                                printf("\rTA MOVENDO Y!\n");
+                                MOTOR2_EN = 0;
+                                MOTOR2_CW = 1;
+                            } 
 
-
-                    // // volta
-                    // while(1) {
-                    //     if (fdc[0][0] == 1 || fdc[0][1] == 1) {
-                    //             printf("\rENTROU NO WHILE CERTO!\n");
-                    //             MOTOR1_EN = 0;
-                    //             MOTOR1_CW = 1;
-                    //         } 
-                        
-                    //     if (fdc[1][0] == 1 || fdc[1][1] == 1) {
-                    //             printf("\rENTROU NO WHILE CERTO!\n");
-                    //             MOTOR1_EN = 0;
-                    //             MOTOR1_CW = 1;
-                    //         } 
-
-                    //     if (fdc[2][0] == 1 || fdc[2][1] == 1) {
-                    //             printf("\rENTROU NO WHILE CERTO!\n");
-                    //             MOTOR1_EN = 1;
-                    //             MOTOR1_CW = 0;
-                    //         } 
-                            
-                        // if (fdc[0][0] == 0 || fdc[0][1] == 0) {
-                        //     printf("\rENTROU NO ERRADO!!\n");
-                        //     MOTOR1_EN = 1;
-                        //     break;
-                        // }
-
-                        // if (fdc[1][0] == 0 || fdc[1][1] == 0) {
-                        //     printf("\rENTROU NO ERRADO!!\n");
-                        //     MOTOR1_EN = 1;
-                        //     break;
-                        // }
-
-                        // if (fdc[2][0] == 0 || fdc[2][1] == 0) {
-                        //     printf("\rENTROU NO ERRADO!!\n");
-                        //     MOTOR1_EN = 1;
-                        //     break;
-                        // }
-                        
-                    }
-                                                // }
-
-
-
-                        // printf("\rVERDE PRESSIONADO!\n");
-                        // for (int i = 0; i < 3; i++) {
-                        //     if (fdc[i][0] == 1 || fdc[i][1] == 1) {
-                        //             MOTOR2_EN = 1;
-
-                        //             MOTOR1_EN = 0;
-                        //             MOTOR1_CW = 0; // direção do motor
-                        //         } else {
-                        //             MOTOR1_EN = 1;
-                        //             break;
-                        //     }
-
-                            // // desliga os motores
-                            // MOTOR1_EN = 1;
-                            // MOTOR2_EN = 1;
-
-
-                            // // Eixo xyz - Sentido 2
-                            // while(fdc[i][0] == 0 or fdc[i][1] == 0) {
-                            //     if (i == 0) {
-                            //         MOTOR1_EN = 0;
-                            //         MOTOR1_CW = 1; // direção do motor
-
-                            //         MOTOR2_EN = 1;
-                            //     }  
-
-                            //     if (i == 1) {
-                            //         MOTOR1_EN = 1;
-        
-                            //         MOTOR2_EN = 0;
-                            //         MOTOR2_CW = 1; // direção do motor
-                            //     } 
+                        if (fdc[1][0] == 0 || fdc[1][1] == 0) {
+                            // printf("\rENTROU NO RETORNO Y!\n");
+                            while(1) {
+                                if (fdc[1][0] == 0 || fdc[1][1] == 0) {
+                                    printf("\rRETORNANDO Y!\n");
+                                    MOTOR2_EN = 0;
+                                    MOTOR2_CW = 0;
+                                } else if (fdc[1][0] == 1 || fdc[1][1] == 1) {
+                                    printf("\rSAIU DO RETORNO DE Y!\n");
+                                    MOTOR2_EN = 1;
+                                    break;
+                                } 
                                 
-                            //     if (i == 2) {
-                            //         // for (int j = 0; j < 4; j++) {
-                            //         //     MOTOR3 = 1 << j;
-                            //         //     wait(0.01);
-                            //         // }
-                            //         // MOTOR3 = 0x0000; // conferir se esse é o valor correto 
-                            //     } 
-                            // }
-                 
+                            }
+                            break;
+                        }   
+                    }
+
+
+                    // eixo z
+                    while(1) {
+                        // printf("\rENTROU\n");
+                        if (fdc[2][0] == 1 /*|| fdc[2][1] == 1*/) {
+                                printf("\rMOVENDO Z!\n");
+                                MOTOR3_EN = 0;
+                                MOTOR3_CW = 1;
+                            } 
+
+                        if (fdc[2][0] == 0 /*|| fdc[2][1] == 0*/) {
+                            // printf("\rENTROU RETORNO DE Z!!\n");
+                            while(1) {
+                                if (fdc[2][0] == 0 /*|| fdc[2][1] == 0*/) {
+                                    printf("\rRETORNANDO Z!\n");
+                                    MOTOR3_EN = 0;
+                                    MOTOR3_CW = 0;
+                                } else if (fdc[2][0] == 1 /*|| fdc[2][1] == 1*/) {
+                                    printf("\rSAIU DO RETORNO DE Z, ACABOU!\n");
+                                    MOTOR3_EN = 1;
+                                    break;
+                                } 
+                                
+                            }
+                            break;
+                        }   
+                    }
                     
                     // end_ref(LED_Y, LED_G);
-                    
-                    // zeramento de variáveis no referenciamento
-
-                    // MOTOR_CLK.write(0);
-                    // MOTOR1_EN = 1; // Desligando o MOTOR1
-                    // MOTOR2_EN = 1; // Desligando o MOTOR2
-
-                    // position[0] = 1; // posição x
-                    // position[1] = 2; // posição y
-                    // position[2] = 3; // posição z
-                // }
+                }
+                         
 

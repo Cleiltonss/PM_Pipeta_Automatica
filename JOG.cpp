@@ -4,7 +4,9 @@
 
 // joystick + coleta de dados para pipetagem
 void JOG(AnalogIn xAxis, AnalogIn yAxis,
-         PwmOut MOTOR_CLK, DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, 
+         PwmOut MOTOR_CLK, 
+         DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR3_CW, 
+         DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, DigitalOut MOTOR3_EN,  
          int position[3], int *step_jog, float *speed,
          DigitalIn button_g, 
          DigitalOut LED_G, DigitalOut LED_B,
@@ -36,7 +38,7 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                     if (joystick[0] < 550 && joystick[0] > 450 && joystick[1] < 550 && joystick[1] > 450) {
                         MOTOR1_EN = 1;
                         MOTOR2_EN = 1;
-                        // printf("\nX e Y PARADOS!\n");
+                        printf("\nX e Y PARADOS!\n");
                     }
                     
                     // movimento leste
@@ -46,7 +48,7 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                         MOTOR1_EN = 0;
                         MOTOR1_CW = 0;
                         position[0]++;
-                        // printf("\nDIREITA!\n");
+                        printf("\nDIREITA!\n");
                     }
 
                     // movimento oeste
@@ -56,7 +58,7 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                         MOTOR1_EN = 0; 
                         MOTOR1_CW = 1;
                         position[0]--;
-                        // printf("\rESQUERDA!\n\n");
+                        printf("\rESQUERDA!\n\n");
                     }
 
                     // movimento norte
@@ -66,7 +68,7 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                         MOTOR2_EN = 0;
                         MOTOR2_CW = 0; 
                         position[1]++;
-                        // printf("\rCIMA!\n\n");
+                        printf("\rCIMA!\n\n");
                     }
 
                     // movimento sul
@@ -76,7 +78,7 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                         MOTOR2_CW = 0; 
                         MOTOR2_CW = 1; 
                         position[1]--;
-                        // printf("\rY BAIXO!\n\n");
+                        printf("\rY BAIXO!\n\n");
                     }
 
                     // movimento nordeste
@@ -88,7 +90,7 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                         MOTOR2_CW = 0; 
                         position[0]++;
                         position[1]++;
-                        // printf("\rNORDESTE!\n\n");
+                        printf("\rNORDESTE!\n\n");
                     }
                     
                     // movimento noroeste
@@ -100,7 +102,7 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                         MOTOR2_CW = 0; 
                         position[0]--;
                         position[1]++;
-                        // printf("\rNOROESTE\n\n");
+                        printf("\rNOROESTE\n\n");
                     }
 
                     // movimento sudoeste
@@ -112,7 +114,7 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                         MOTOR2_CW = 1; 
                         position[0]--;
                         position[1]--;
-                        // printf("\rSUDOESTE!\n\n");
+                        printf("\rSUDOESTE!\n\n");
                     }
 
                     // movimento sudeste
@@ -124,62 +126,65 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                         MOTOR2_CW = 1; 
                         position[0]++;
                         position[1]--;
-                        // printf("\rSUDESTE!\n\n");
+                        printf("\rSUDESTE!\n\n");
                     }
                 }
 
                 
-                // // Eixo Z - movimento norte e sul
-                // if (switchz == 1) {
-                //     joystick[0] = 0;
-                //     joystick[1] = 0;
-                //     joystick[2] = yAxis.read() * 1000;
+                // Eixo Z - movimento norte e sul
+                if (switchz == 1) {
+                    joystick[0] = 0;
+                    joystick[1] = 0;
+                    joystick[2] = yAxis.read() * 1000;
                     
-                //     if (450 < joystick[2] && joystick[2] < 550) {
-                //         MOTOR3 = 0x0000; 
-                //     }
+                    if (450 < joystick[2] && joystick[2] < 550) {
+                        printf("\rEIXO Z PARADO!\n\n");
+                        MOTOR3_EN = 1; 
+                    }
+                    
+                    // Deslocamento do MOTOR - z norte
+                    if (joystick[2] > 600) {
+                        MOTOR3_EN = 0;
+                        MOTOR3_CW = 0;
+                        position[2]++;
+                    }
 
-                //     if (joystick[2] > 600) {
-                //         // Deslocamento do MOTOR - z cima
-                //         for (int j = 0; j < 4; j++) {
-                //             MOTOR3 = 1 << j;
-                //             wait(0.01);
-                //         }
-                //         position[2] = position[2] + 1;
-                //         MOTOR3 = 0x0000; 
-                //     }
+                    // Deslocamento do MOTOR - z sul
+                    if (joystick[2] < 400) {
+                        MOTOR3_EN = 0;
+                        MOTOR3_CW = 1;
+                        position[2]--;
 
-                //     if (joystick[2] < 400) {
-                //         // Deslocamento do MOTOR - z baixo - VERIFICAR SE INVERTEU O SENTIDO
-                //         for (int j = 4; j > 0; j--) {
-                //             MOTOR3 = 1 << j;
-                //             wait(0.01);
-                //         }
-                //         position[2] = position[2] - 1;
-                //         MOTOR3 = 0x0000; 
-                //     }
 
-                //     if (*step_jog == 2) {
-                //         // printf("\rPASSO 2!\n\n");
-                //         end_pCollectZ(button_g, LED_B);
-                //         pCollect[2] = position[2];
+                        // for (int j = 4; j > 0; j--) {
+                        //     MOTOR3 = 1 << j;
+                        //     wait(0.01);
+                        // }
+                        // position[2] = position[2] - 1;
+                        // MOTOR3 = 0x0000; 
+                    }
 
-                //         // É necessário zerar a contagem para as novas medidas dos frascos
-                //         position[0] = 0;
-                //         position[1] = 0;
-                //         position[2] = 0;
+                    if (*step_jog == 2) {
+                        // printf("\rPASSO 2!\n\n");
+                        end_pCollectZ(button_g, LED_B);
+                        pCollect[2] = position[2];
 
-                //         switchz = 0; // para de movimentar z 
+                        // É necessário zerar a contagem para as novas medidas dos frascos
+                        position[0] = 0;
+                        position[1] = 0;
+                        position[2] = 0;
 
-                //         *step_jog = *step_jog + 1; // necessário para  a próxima passada de etapa
-                //     }
+                        switchz = 0; // para de movimentar z 
 
-                //     if ((*step_jog-5) < 32) {
-                //         pPepet[index][2] = position[2];
+                        *step_jog = *step_jog + 1; // necessário para  a próxima passada de etapa
+                    }
 
-                //         switchz = 0;
-                //     }
-                // }
+                    if ((*step_jog-5) < 32) {
+                        pPepet[index][2] = position[2];
+
+                        switchz = 0;
+                    }
+                }
 
                 
                 // Entrada dos passos de coleta e altura do frascos de coleta para pipetagem 
@@ -238,9 +243,9 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                             }
                         }
                     }
+
                     *step_jog = *step_jog + 1; 
                     wait(1); // Controll Time to each time that the green button is press
-
                 }
   
                 

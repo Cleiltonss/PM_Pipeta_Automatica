@@ -180,7 +180,7 @@ void start_ref(DigitalIn button_g, DigitalOut LED_Y){
         delay(70);
         clean();
     }
-
+    printf("\rHELLOW!\n");
     tft.setCursor(110, 100); //  Orientação do texto X,Y
     tft.println("Hello!");
     delay(1000);
@@ -207,7 +207,7 @@ void start_ref(DigitalIn button_g, DigitalOut LED_Y){
     
     // Led amarelo pulsando até que, ao pressionar o botão verde, se torna contínuo
     while (1) {
-        if (button_g == 0) {
+        if (button_g == 1) {
             LED_Y = 0;
             
         } else {
@@ -217,7 +217,7 @@ void start_ref(DigitalIn button_g, DigitalOut LED_Y){
 
         wait(0.1);
 
-        if (button_g == 0) {
+        if (button_g == 1) {
             LED_Y = 1;
             
         } else {
@@ -232,7 +232,7 @@ void start_ref(DigitalIn button_g, DigitalOut LED_Y){
 
 void dur_ref() {
     clean();
-    tft.fillRoundRect(40, 40, 235, 50, 1, BLACK);
+    tft.fillRoundRect(30, 40, 265, 50, 1, BLACK);
     tft.setTextColor(RED);
     tft.setTextSize(3);
     tft.setCursor(45, 50); // Orientação X,Y
@@ -251,7 +251,7 @@ void end_ref(DigitalOut LED_Y, DigitalOut LED_G) {
     LED_Y = 0;
     LED_G = 1;
 
-    tft.fillRoundRect(40, 40, 235, 50, 1, BLACK);
+    tft.fillRoundRect(30, 40, 265, 50, 1, BLACK);
     tft.setTextColor(RED);
     tft.setTextSize(3);
     tft.setCursor(45, 50); // Orientação X,Y

@@ -8,7 +8,9 @@
 
 
 void JOG(AnalogIn xAxis, AnalogIn yAxis,
-        PwmOut MOTOR_CLK, DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, 
+        PwmOut MOTOR_CLK, 
+        DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR3_CW, 
+        DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, DigitalOut MOTOR3_EN, 
         int position[3], int *step_jog, float *speed,
         DigitalIn button_g,
         DigitalOut LED_B, DigitalOut LED_G,
