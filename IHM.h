@@ -17,7 +17,8 @@ void end_ref(DigitalOut LED_Y, DigitalOut LED_G);
 // mensagens de Ponto de Coleta
 void start_pCollect(DigitalIn button_g, DigitalOut LED_B, DigitalOut LED_G);
 void end_pCollectXY(DigitalIn button_g, DigitalOut LED_B);
-void end_pCollectZ(DigitalIn button_g, DigitalOut LED_B);
+void dur_pCollectZ();
+// void end_pCollectZ(DigitalIn button_g, DigitalOut LED_B);
 void start_pCollectH(int position[3], DigitalIn button_g, DigitalOut LED_B);
 void end_pCollectH(DigitalIn button_g, DigitalOut LED_B, DigitalOut LED_G);
 

@@ -70,14 +70,11 @@ int n_frascos = 0; // Define o número de frascos que serão pipetados
 
 
 //********************************************************SPEED DO MOTOR*******************************************
-// Define velocidade do motor. Quando o botão azul é apertado - button_b - a velocidade é aumentada em x2
-float speed = 0.005;
-
 void normal_speed() {
-    speed = 0.005; // 100 hz: voltar para 0.01
+    MOTOR_CLK.period(0.005); // 200 hz: voltar para 0.01
 }
 void high_speed() {
-    speed = 0.002; // 500 hz
+    MOTOR_CLK.period(0.002); // 1000 hz
 }
 //********************************************************SPEED DO MOTOR********************************************
 
@@ -107,25 +104,25 @@ int main() {
     int position[3] = {0, 0, 0};
 
     MOTOR_CLK.write(0.5); // Duty cicle para 50%
-    MOTOR_CLK.period(speed); // *speed inicial igual a 0.01
+    MOTOR_CLK.period(0.005); // *speed inicial igual a 0.01
  
     
     while (1) {
-        start_ref(button_g, LED_Y);
-        REFERENCING(fdc, position, &speed,
-                    MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN,  
-                    button_g,
-                    LED_Y, LED_G, fdcz1);
+        // start_ref(button_g, LED_Y);
+        // REFERENCING(fdc, position, &speed,
+        //             MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN,  
+        //             button_g,
+        //             LED_Y, LED_G);
         
 
-        // JOG(xAxis, yAxis, 
-        //     MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN, 
-        //     position, &step_jog, &speed,
-        //     button_g, 
-        //     LED_B, LED_G,
-        //     pCollect, pPepet,
-        //     &n_frascos
-        //     );
+        JOG(xAxis, yAxis, 
+            MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN, 
+            position, &step_jog, 
+            button_g, 
+            LED_B, LED_G,
+            pCollect, pPepet,
+            &n_frascos
+            );
         // // printf("SAI DO JOG!");
         // AUT_PEPETTING(&n_frascos, pCollect, pPepet, position, 
         //               MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR1_EN, MOTOR2_EN,
