@@ -15,7 +15,7 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
         DigitalIn button_g,
         DigitalOut LED_B, DigitalOut LED_G,
         int pCollect[4], int pPepet[][4],
-        int *n_frascos);
+        int *n_frascos, int *index, int *loop);
 
 #endif
 

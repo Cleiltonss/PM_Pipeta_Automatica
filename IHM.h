@@ -7,6 +7,7 @@ void clean();
 void clean_start_NumFlask();
 void clean_start_pCollectH();
 void clean_start_FlaskH();
+void clean_start_FlaskPositionUpdate();
 
 // mensagens de referenciamento
 void start_ref(DigitalIn button_g, DigitalOut LED_Y);
@@ -25,9 +26,11 @@ void end_pCollectH(DigitalIn button_g, DigitalOut LED_B, DigitalOut LED_G);
 
 // mensagens de dados para pipetagem
 void start_NumFlask(DigitalIn button_g, int *n_frascos, DigitalOut LED_B, DigitalOut LED_G);
-int start_FlaskH(int value, DigitalIn button_g, DigitalOut LED_B);
-void start_FlaskPosition(float X, float Y);
-
+int start_FlaskH(int value, DigitalIn button_g, DigitalOut LED_B, int *index);
+void start_FlaskPosition(int index, int x, int y);
+void start_FlaskPositionUpdate(int x, int y);
+void start_FlaskPositionZ(int index);
+void start_FlaskPositionUpdateZ(int y);
 
 
 void IHM(DigitalOut button_g, DigitalOut LED_Y); // movimenta no sentido horário e antihorário

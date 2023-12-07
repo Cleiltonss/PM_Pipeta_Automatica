@@ -11,15 +11,13 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
          DigitalIn button_g, 
          DigitalOut LED_G, DigitalOut LED_B,
          int pCollect[4], int pPepet[][4],
-         int *n_frascos) 
+         int *n_frascos, int *index, int *loop) 
          {
 
             // IHM(LED_R, button_g);
             int joystick[3]; // lista com as posições x,y,z do joystick
             int switchz = 0; // variável que muda posição joystick xy para z
             bool leave_cp = true; // Define quebra do looping total de saída
-            int incre_loop = 5; // Auxilia para index do looping de registro de valores de pipetagem
-            int index = *step_jog - incre_loop; 
             
             
             start_pCollect(button_g, LED_B, LED_G);
@@ -138,24 +136,24 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                     joystick[2] = yAxis.read() * 1000;
                     
                     if (450 < joystick[2] && joystick[2] < 550) {
-                        printf("\rEIXO Z PARADO!\n");
-                        MOTOR3_EN = 1; 
+                        // printf("\rEIXO Z PARADO!\n");
+                        MOTOR3_EN = 0; 
                     }
                     
                     // Deslocamento do MOTOR - z norte
                     if (joystick[2] > 600) {
-                        MOTOR3_EN = 0;
+                        MOTOR3_EN = 1;
                         MOTOR3_CW = 0;
                         position[2]++;
-                        printf("\rEIXO Z NORTE!\n\n");
+                        // printf("\rEIXO Z NORTE!\n\n");
                     }
 
                     // Deslocamento do MOTOR - z sul
                     if (joystick[2] < 400) {
-                        MOTOR3_EN = 0;
+                        MOTOR3_EN = 1;
                         MOTOR3_CW = 1;
                         position[2]--;
-                        printf("\rEIXO Z SUL!\n\n");
+                        // printf("\rEIXO Z SUL!\n\n");
                     }
 
 
@@ -170,13 +168,22 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
 
                         switchz = 0; // para de movimentar z 
                         *step_jog = *step_jog + 1; // necessário para  a próxima passada de etapa
+                        printf("\rFINALIZOU O PASSO 3!\n");
                     }
 
-                    // if ((*step_jog-5) < 32) {
-                    //     pPepet[index][2] = position[2];
+                    if (*step_jog == 9 || *step_jog == 13 || *step_jog == 17 || *step_jog == 21 || *step_jog == 25 || *step_jog == 29 || *step_jog == 33 || *step_jog == 37 || *step_jog == 41) {
+                        printf("\rPASSO %i!\n", *step_jog);
+                        pPepet[*index][2] = position[2];
+                        *step_jog = *step_jog + 1; // primeiro ciclo aqui vai pra *step_jog = 10
+                        printf("\rFINALIZOU O PASSO %i!\n", *step_jog);
+                        *index = *index+1;
+                        *step_jog = *step_jog+1; // *step_jog == 30
+                        switchz = 0;
 
-                    //     switchz = 0;
-                    // }
+                        if (*index < *n_frascos) {
+                            start_FlaskPosition(*index, position[0], position[1]);
+                        }
+                    }
                 }
 
 
@@ -204,51 +211,64 @@ void JOG(AnalogIn xAxis, AnalogIn yAxis,
                         printf("\rPASSO 4!\n");
                         start_pCollectH(position, button_g, LED_B); // verificar se salvou realmente a posição!
                         pCollect[3] = position[1]; // armazenou aqui o valor final para ter tudo de posição da COLETA
-                        printf("\rValor do Volume de coleta: %i\n", pCollect[3]);
-                        printf("\rValor do step_jog: %i\n", *step_jog);
+                        printf("\rValor do Volume de Coleta: %i\n", pCollect[3]);
+                        // printf("\rValor do step_jog: %i\n", *step_jog);
                         position[1] = 0;
                         end_pCollectH(button_g, LED_B, LED_G);
+                        printf("\rFINALIZOU O PASSO 4!\n");
                     }
 
                     // Salva quantidade de frascos para pipetagem - será substituido por tela touchscreen
                     if (*step_jog == 5) {
                         printf("\rPASSO 5!\n");
                         start_NumFlask(button_g, n_frascos, LED_B, LED_G); // verificar se salvou os frascos
+                        printf("\rFINALIZOU O PASSO 5!\n");
                     }
 
-                    
-                    // // looping para pegar valores para pipetagem
-                    // if (index < *n_frascos) {
-                    //     // Salva a quantidade de volume do frasco n 
-                    //     if ((*step_jog-5) == 0 || (*step_jog-5) == 3 || (*step_jog-5) == 6 || (*step_jog-5) == 9 || (*step_jog-5) == 12 || (*step_jog-5) == 15 || (*step_jog-5) == 18 || (*step_jog-5) == 21 || (*step_jog-5) == 24) {
-                    //         pPepet[index][3] = start_FlaskH(pPepet[index][3], button_g, LED_B); // ele está salvando! está correto!
+            
+                    if (*index < *n_frascos) {
+                        // Salva a quantidade de volume do frasco n 
+                        // printf("\rENTRANDO NA COLETA DOS FRASCOS\n");
+                        if (*step_jog == 6 || *step_jog == 10 || *step_jog == 14 || *step_jog == 18 || *step_jog == 22 || *step_jog == 26 || *step_jog == 30 || *step_jog == 34 || *step_jog == 38) {
+                            // printf("\rValor de pPete[index][3]: %i\n", index);
+                            pPepet[*index][3] = start_FlaskH(pPepet[*index][3], button_g, LED_B, index); // ele está salvando! está correto!
+                            printf("\rValor de altura do frasco %i: %i\n", *index+1, pPepet[*index][3]);
+                            // printf("\rTerminou a coleta com um total de %i frasco(s)\n", *index+1);
+                            // colocar led azul pulsante 
 
-                    //         // colocar led azul pulsante 
-                    //     }
+                            start_FlaskPosition(*index, position[0], position[1]);
+                        }
 
-                    //     if ((*step_jog-5) == 1 || (*step_jog-5) == 4 || (*step_jog-5) == 7 || (*step_jog-5) == 10 || (*step_jog-5) == 13 || (*step_jog-5) == 16 || (*step_jog-5) == 19 || (*step_jog-5) == 22 || (*step_jog-5) == 25) {
-                    //         start_FlaskPosition(joystick[0], joystick[1]);
-                    //         while (switchz == 0) {
-                    //             // *step_jog-5 começa com valor 0 e vai aumentando de 1 em 1
-                    //             pPepet[index][0] = position[0];
-                    //             pPepet[index][1] = position[1];
-                    //             switchz = 1;
-                    //             incre_loop++;
-                    //         }
-                    //     }
-                    // }
-
+                        if (*step_jog == 7 || *step_jog == 11 || *step_jog == 15 || *step_jog == 19 || *step_jog == 23 || *step_jog == 27 || *step_jog == 31 || *step_jog == 35 || *step_jog == 39) {
+                            // printf("ENTROU NO PASSO QUE EU QUERIA!");
+                            pPepet[*index][0] = position[0];
+                            pPepet[*index][1] = position[1];
+                            switchz = 1;
+                            wait(0.5);
+                            start_FlaskPositionZ(*index);
+                        }
+                    }                    
                     *step_jog = *step_jog + 1; 
                     wait(1); // Controll Time to each time that the green button is press
                 }
-  
-                
 
-                // // quebra do looping - sai do while no passo 5
-                // if (*step_jog-5 == *n_frascos) {
-                //     LED_G = 1;
-                //     leave_cp = false;
-                // } 
+
+                // printf("\rValor step_jog: %i\n", *step_jog);
+                if (*step_jog == 7 || *step_jog == 11 || *step_jog == 15 || *step_jog == 19 || *step_jog == 23 || *step_jog == 27 || *step_jog == 31 || *step_jog == 35 || *step_jog == 39) {
+                    // printf("\rDENTRO\n");
+                    start_FlaskPositionUpdate(position[0], position[1]);
+                }
+
+                if (*step_jog == 8 || *step_jog == 12 || *step_jog == 16 || *step_jog == 20 || *step_jog == 24 || *step_jog == 28 || *step_jog == 32 || *step_jog == 36 || *step_jog == 40) {
+                    start_FlaskPositionUpdateZ(position[2]);
+                }
+    
+
+                // quebra do looping - sai do while no passo 5
+                if (*index == *n_frascos) {
+                    LED_G = 1;
+                    leave_cp = false;
+                } 
                 
             }
        
