@@ -4,18 +4,15 @@
 
 
 
-int JOG(AnalogIn xAxis, AnalogIn yAxis,
-        DigitalOut MOTOR_CLK, DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR3_CW, 
-        DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, DigitalOut MOTOR3_EN, 
-        int position[3], int *step_jog, 
-        DigitalIn button_g,
-        DigitalOut LED_B, DigitalOut LED_G,
-        int pCollect[4], int pPepet[][4],
-<<<<<<< HEAD
-        int *n_frascos, int *index, float *speed);
-=======
-        int *n_frascos, int *index, int *loop);
->>>>>>> 5c0de22dde1c8f602ac3fb9b68b8ca580c8faa38
+// int JOG(AnalogIn xAxis, AnalogIn yAxis,
+//         DigitalOut MOTOR_CLK, DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR3_CW, 
+//         DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, DigitalOut MOTOR3_EN, 
+//         int position[3], int *step_jog, 
+//         DigitalIn button_g,
+//         DigitalOut LED_B, DigitalOut LED_G,
+//         int pCollect[4], int pPepet[][4],
+//         int *n_frascos, int *index, float *speed);
+//         int *n_frascos, int *index, int *loop);
 
 #endif
 
