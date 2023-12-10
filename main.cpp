@@ -71,7 +71,7 @@ DigitalOut rele2(PC_3, 0);
 
 float speed = 0.002;
 
-//********************************************************SPEED DO MOTOR*******************************************
+//********************************************************SPEED DO MOTOR*************************************************************
 void normal_speed() {
     speed = 0.002; // 200 hz: voltar para 0.01
 }
@@ -79,7 +79,7 @@ void high_speed() {
     speed = 0.001; // 1000 hz
     // printf("\rENTROU\n");
 }
-//********************************************************SPEED DO MOTOR********************************************
+//********************************************************SPEED DO MOTOR*************************************************************
 
 
 
@@ -131,8 +131,8 @@ int main() {
     int switchz = 0; // variável que muda posição joystick xy para z
     int joystick[3]; // lista com as posições x,y,z do joystick
     bool leave_cp = true; // Define quebra do looping total de saída
-    // IHM(LED_R, button_g);
-    start_pCollect(button_g, LED_B, LED_G); // DESCOMENTAR DEPOIS!
+
+    start_pCollect(button_g, LED_B, LED_G); 
     while (1) {
 
         // printf("\rswitchz: %i!\n", switchz);
@@ -359,7 +359,15 @@ int main() {
 
 
         // Entrada dos passos de coleta e altura do frascos de coleta para pipetagem 
-        if (button_g == 0) {
+        if (button_g == 0 || button_r == 0) {
+            
+            // botão de retorno para as etapas
+            if (button_r == 0 && step_jog > 1) {
+                step_jog--;
+                wait(0.5);
+            }
+
+
             if (step_jog == 0) {
                 // printf("\rPASSO 0!\n");
                 // printf("\rFINALIZOU O PASSO 0!\n");
@@ -420,8 +428,13 @@ int main() {
                     start_FlaskPositionZ(index);
                 }
             }                    
-            step_jog = step_jog + 1; 
-            wait(1); // Controll Time to each time that the green button is press
+
+
+            // estado para seguir as etapas
+            if (button_g == 0) {
+                step_jog++;
+                wait(0.5);
+            } // Controll Time to each time that the green button or red button is pressing
         }
 
 
@@ -435,6 +448,7 @@ int main() {
             start_FlaskPositionUpdateZ(position[2]);
         }  
 
+        // critério de saída do looping principal
         if (index == n_frascos) {
             break;
         }
@@ -475,7 +489,7 @@ int main() {
     MOTOR3_EN = 1;
 
 
-
+    // retorno para o ponto xy de coleta
     while(1) {
         RETURN(&x, &y, xCollect, yCollect, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN, &speed);
 
@@ -495,8 +509,6 @@ int main() {
             }
         }
     }
-
-
 
 
     // INÍCIO DA PIPETAGEM
@@ -589,6 +601,7 @@ int main() {
     }*/
 
 
+    //***********************************************************PIPETAGEM*******************************************************************
 }
     
 
