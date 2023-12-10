@@ -1,243 +1,317 @@
-#include "mbed.h"
 #include "AUT_PEPETTING.h"
 #include "IHM.h"
 
-void AUT_PIPETTING(int *n_frascos, int pCollect[3], int pPepet[][4], int position[3], 
-                   PwmOut MOTOR_CLK, DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, 
-                   DigitalOut rele) {
+
+// Função que realiza a subida da pipeta
+void UP(int *z, 
+       DigitalOut MOTOR_CLK, 
+       DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR3_CW, 
+       DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, DigitalOut MOTOR3_EN,
+       float *speed) {
 
     
-    // float speed = 0.01;
-    // /* 
-
-    // Ajustando a posição da máquina para o ficar sob o ponto de coleta... 
-    // para cada valor de j, será analisado os eixos x, y e z respectivamente 
-
-    // */
-
-    // // Sobe Eixo Z para: (position[0], position[1], 0)
-    // for (int i = position[2]; i == 0; i--) {
-    //     MOTOR_EN = 0;
-
-    //     // Deslocamento do MOTOR - z cima
-    //     for (int j = 0; j < 4; j++) {
-    //         MOTOR3 = 1 << j;
-    //         wait(0.01);
-    //     }
-    //     position[2] = position[2] - 1;
-    //     MOTOR3 = 0x0000; // conferir se esse é o valor correto
-    // }
 
 
-    // for (int j = 0; j < 3; j++) {
+    // movimento para cima de volta - eixo z - até o ponto da posição de coleta
+    MOTOR3_EN = 0;
+    MOTOR_CLK = 0;
+    wait(*speed);
+    MOTOR_CLK = 1;
+    wait(*speed);
 
-    //     // Quando a posição final em xy está a frente do ponto de coleta
-    //     if (pPepet[*n_frascos][j] > pCollect[j]) {
-    //         int distance = pPepet[*n_frascos][0] - pCollect[0];
-    //         for (int i = 0; i < distance; i++) {
-    //             if (j == 0) {
-    //                 MOTOR_EN = 0; // ENABLE
-    //                 MOTOR1_CLK.period(*speed);
-    //                 MOTOR1_CLK.write(0.5); // Duty Cicle em 50%
-    //                 MOTOR1_CW = 1;  // Direção
-    //                 position[0] = position[0] - 1;
-    //                 MOTOR1_CLK.write(0);
-    //             }
+    MOTOR3_CW = 1;
 
-    //             if (j == 1) {
-    //                 MOTOR_EN = 0; // ENABLE
-    //                 MOTOR2_CLK.period(*speed);
-    //                 MOTOR2_CLK.write(0.5); // Duty Cicle em 50%
-    //                 MOTOR2_CW = 1;  // Direção
-    //                 position[1] = position[1] - 1;
-    //                 MOTOR2_CLK.write(0); // Duty Cicle em 0%
-    //             }
-    //         }
-    //     }
-
-    //     // Quando a posição final em xy está atrás do ponto de coleta
-    //     if (pPepet[*n_frascos][j] < pCollect[j]) {
-    //         int distance = pCollect[0] - pPepet[*n_frascos][0];
-    //         for (int i = 0; i < distance; i++) {
-    //             if (j == 0) {
-    //                 MOTOR_EN = 0; // ENABLE
-    //                 MOTOR1_CLK.period(*speed);
-    //                 MOTOR1_CLK.write(0.5); // Duty Cicle em 50%
-    //                 MOTOR1_CW = 0; 
-    //                 position[0] = position[0] + 1;
-    //                 MOTOR1_CLK.write(0); // VERIFICAR SE PARAR O CLOCK BEM AQUI É A MELHOR ALTERNATIVA!
-    //             }
-
-    //             if (j == 1) {
-    //                 MOTOR_EN = 0; // ENABLE
-    //                 MOTOR2_CLK.period(*speed);
-    //                 MOTOR2_CLK.write(0.5); // Duty Cicle em 50%
-    //                 MOTOR2_CW = 0;  // Direção
-    //                 position[1] = position[1] + 1;
-    //                 MOTOR2_CLK.write(0); // Duty Cicle em 0%
-    //             }
-    //         }
-    //     }
-    // }
-    
-
-    // // Inicia as etapas de pipetagem para cada um dos frascos 
-    // for (int n = 0; n < *n_frascos; n++) {
-    //     for (int vp = 0; vp < pPepet[n][3]; vp++) {
-
-    //         // Desce eixo Z para posição de coleta
-    //         for (int i = 0; i < pCollect[2]; i++) {
-    //             // Deslocamento do MOTOR - z cima
-    //             for (int j = 0; j < 4; j++) {
-    //                 MOTOR3 = 1 << j;
-    //                 wait(0.01);
-    //             }
-    //             position[2] = position[2] + 1;
-    //             MOTOR3 = 0x0000; // conferir se esse é o valor correto
-    //         }
-
-    //         // acionamento da pipeta: pega líquido
-    //         rele = 1; 
-
-    //         // Sobe Eixo Z para: (xcoleta, ycoleta, 0)
-    //         for (int i = position[2]; i == 0; i--) {
-    //             // Deslocamento do MOTOR - z baixo - VERIFICAR SE INVERTEU O SENTIDO
-    //             for (int j = 4; j > 0; j--) {
-    //                 MOTOR3 = 1 << j;
-    //                 wait(0.01);
-    //             }
-    //             position[2] = position[2] - 1;
-    //             MOTOR3 = 0x0000; // conferir se esse é o valor correto
-    //         }
-
-    //         for (int j = 0; j < 3; j++) {
-    //             // desloca xn e yn quando a posição em xy está na frente do ponto de coleta
-    //             if (pPepet[n][j] > pCollect[j]) {
-    //                 int distance = pPepet[n][0] - pCollect[0];
-    //                 for (int i = 0; i < distance; i++) {
-    //                     if (j == 0) {
-    //                         MOTOR_EN = 0; // ENABLE
-    //                         MOTOR1_CLK.period(*speed);
-    //                         MOTOR1_CLK.write(0.5); // Duty Cicle em 50%
-    //                         MOTOR1_CW = 1;  // Direção
-    //                         position[0] = position[0] - 1;
-    //                         MOTOR1_CLK.write(0);
-    //                     }
-
-    //                     if (j == 1) {
-    //                         MOTOR_EN = 0; // ENABLE
-    //                         MOTOR2_CLK.period(*speed);
-    //                         MOTOR2_CLK.write(0.5); // Duty Cicle em 50%
-    //                         MOTOR2_CW = 1;  // Direção
-    //                         position[1] = position[1] - 1;
-    //                         MOTOR2_CLK.write(0); // Duty Cicle em 0%
-    //                     }
-    //                 }
-    //             }
-
-    //             // desloca xn e yn quando a posição em xy está atrás do ponto de coleta
-    //             if (pPepet[n][j] < pCollect[j]) {
-    //                 int distance = pCollect[0] - pPepet[n][0];
-    //                 for (int i = 0; i < distance; i++) {
-    //                     if (j == 0) {
-    //                         MOTOR_EN = 0; // ENABLE
-    //                         MOTOR1_CLK.period(*speed);
-    //                         MOTOR1_CLK.write(0.5); // Duty Cicle em 50%
-    //                         MOTOR1_CW = 0; 
-    //                         position[0] = position[0] + 1;
-    //                         MOTOR1_CLK.write(0); // VERIFICAR SE PARAR O CLOCK BEM AQUI É A MELHOR ALTERNATIVA!
-    //                     }
-
-    //                     if (j == 1) {
-    //                         MOTOR_EN = 0; // ENABLE
-    //                         MOTOR2_CLK.period(*speed);
-    //                         MOTOR2_CLK.write(0.5); // Duty Cicle em 50%
-    //                         MOTOR2_CW = 0;  // Direção
-    //                         position[1] = position[1] + 1;
-    //                         MOTOR2_CLK.write(0); // Duty Cicle em 0%
-    //                     }
-    //                 }
-                    
-    //                 // Desce eixo Z para posição de zn
-    //                 for (int i = 0; i < pPepet[n][3]; i++) {
-    //                     for (int j = 0; j < 4; j++) {
-    //                         MOTOR3 = 1 << j;
-    //                         wait(0.01);
-    //                     }
-    //                     position[2] = position[2] + 1;
-    //                     MOTOR3 = 0x0000; // conferir se esse é o valor correto
-    //                 }
-
-    //                 // Desacionar o relé: despeja o líquido
-    //                 rele = 0;
-
-    //                 // Sobe Eixo Z para: (xn, yn, 0)
-    //                 for (int i = position[2]; i == 0; i--) {
-    //                     // Deslocamento do MOTOR - z baixo - VERIFICAR SE INVERTEU O SENTIDO
-    //                     for (int j = 4; j > 0; j--) {
-    //                         MOTOR3 = 1 << j;
-    //                         wait(0.01);
-    //                     }
-    //                     position[2] = position[2] - 1;
-    //                     MOTOR3 = 0x0000; // conferir se esse é o valor correto
-    //                 }
-
-
-    //                 // retorna para a posição de coleta: (xc, yc, 0)
-    //                 // Quando a posição final em xy está a frente do ponto de coleta
-    //                 for (int j = 0; j < 3; j++) {
-    //                     if (pPepet[*n_frascos][j] > pCollect[j]) {
-    //                         int distance = pPepet[*n_frascos][0] - pCollect[0];
-    //                         for (int i = 0; i < distance; i++) {
-    //                             if (j == 0) {
-    //                                 MOTOR_EN = 0; // ENABLE
-    //                                 MOTOR1_CLK.period(*speed);
-    //                                 MOTOR1_CLK.write(0.5); // Duty Cicle em 50%
-    //                                 MOTOR1_CW = 1;  // Direção
-    //                                 position[0] = position[0] - 1;
-    //                                 MOTOR1_CLK.write(0);
-    //                             }
-
-    //                             if (j == 1) {
-    //                                 MOTOR_EN = 0; // ENABLE
-    //                                 MOTOR2_CLK.period(*speed);
-    //                                 MOTOR2_CLK.write(0.5); // Duty Cicle em 50%
-    //                                 MOTOR2_CW = 1;  // Direção
-    //                                 position[1] = position[1] - 1;
-    //                                 MOTOR2_CLK.write(0); // Duty Cicle em 0%
-    //                             }
-    //                         }
-    //                     }
-
-    //                     // Quando a posição final em xy está atrás do ponto de coleta
-    //                     if (pPepet[*n_frascos][j] < pCollect[j]) {
-    //                         int distance = pCollect[0] - pPepet[*n_frascos][0];
-    //                         for (int i = 0; i < distance; i++) {
-    //                             if (j == 0) {
-    //                                 MOTOR_EN = 0; // ENABLE
-    //                                 MOTOR1_CLK.period(*speed);
-    //                                 MOTOR1_CLK.write(0.5); // Duty Cicle em 50%
-    //                                 MOTOR1_CW = 0; 
-    //                                 position[0] = position[0] + 1;
-    //                                 MOTOR1_CLK.write(0); // VERIFICAR SE PARAR O CLOCK BEM AQUI É A MELHOR ALTERNATIVA!
-    //                             }
-
-    //                             if (j == 1) {
-    //                                 MOTOR_EN = 0; // ENABLE
-    //                                 MOTOR2_CLK.period(*speed);
-    //                                 MOTOR2_CLK.write(0.5); // Duty Cicle em 50%
-    //                                 MOTOR2_CW = 0;  // Direção
-    //                                 position[1] = position[1] + 1;
-    //                                 MOTOR2_CLK.write(0); // Duty Cicle em 0%
-    //                             }
-    //                         }
-    //                     }
-    //                 }
-
-    //             }
-    //         }
-
-            
-    //     }
-    // }
+    *z = (*z-1);
 }
+
+// Função que realiza a descida da pipeta
+void DOWN(int *z,
+             DigitalOut MOTOR_CLK, 
+             DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR3_CW, 
+             DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, DigitalOut MOTOR3_EN,
+             float *speed) {
+
+
+    // movimento para baixo de descida - eixo z
+    MOTOR3_EN = 1;
+    MOTOR_CLK = 1;
+    wait(*speed);
+    MOTOR_CLK = 0;
+    wait(*speed);
+
+    MOTOR3_CW = 0;
+    *z = (*z+1);
+}
+
+
+
+// Função que realiza o retorno do ponto de um frasco até o ponto de coleta
+//********************************************************INÍCIO DO RETORNO***********************************************************
+void RETURN(int *x, int *y, int xCollect, int yCollect, 
+             DigitalOut MOTOR_CLK, 
+             DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR3_CW, 
+             DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, DigitalOut MOTOR3_EN,
+             float *speed) {
+    
+ 
+
+
+    // movimento para esquerda - eixo x - até o ponto de coleta
+    if (*x > xCollect && *y == yCollect) {
+        MOTOR2_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR2_CW = 1;
+        *x = (*x-1);
+    }
+        
+    // movimento para direita - eixo x - até o ponto de coleta
+    if (*x < xCollect && *y == yCollect) {
+        MOTOR2_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR2_CW = 0;
+        *x = (*x-1);
+    }
+
+    // movimento para baixo - eixo y - até o ponto de coleta
+    if (*y > yCollect && *x == xCollect) {
+        MOTOR1_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR1_CW = 0;
+        *y = (*y-1);
+    }
+
+    // movimento para cima - eixo y - até o ponto de coleta
+    if (*y < yCollect && *x == xCollect) {
+        MOTOR1_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR1_CW = 1;
+        *y = (*y-1);
+    }
+        
+
+
+    //**********************************************************MOVIMENTAÇÃO INTERPOLADA**********************************************
+    // movimento de xy no primeiro quadrante em retorno
+    if (*x > xCollect && *y > yCollect) {
+        MOTOR1_EN = 0;
+        MOTOR2_EN = 0;
+
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR1_CW = 0;
+        MOTOR2_CW = 1;
+
+        *x = (*x-1);
+        *y = (*y-1); 
+    }
+
+    // movimento de xy no segundo quadrante em retorno
+    if (*x > xCollect && *y < yCollect) {
+        MOTOR1_EN = 0;
+        MOTOR2_EN = 0;
+
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR1_CW = 1;
+        MOTOR2_CW = 1;
+
+        *x = (*x-1);
+        *y = (*y-1);
+    }
+    
+    // movimento de xy no terceiro quadrante em retorno
+    if (*x < xCollect && *y < yCollect) {
+        MOTOR1_EN = 0;
+        MOTOR2_EN = 0;
+
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR1_CW = 1;
+        MOTOR2_CW = 0;
+
+        *x = (*x-1);
+        *y = (*y-1);
+    }
+
+    // movimento de xy no quarto quadrante em retorno
+    if (*x < xCollect && *y > yCollect) {
+        MOTOR1_EN = 0;
+        MOTOR2_EN = 0;
+
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR1_CW = 0;
+        MOTOR2_CW = 0;
+
+        *x = (*x-1);
+        *y = (*y-1);
+    }
+}
+//********************************************************TERMINO DO RETORNO**********************************************************
+
+
+
+// Função que realiza a ida do ponto de coleta até o ponto de um frasco
+//********************************************************INÍCIO DA VOLTA***********************************************************
+void TAKE(int xPepet, int yPepet, int *x, int *y, 
+             DigitalOut MOTOR_CLK, 
+             DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR3_CW, 
+             DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, DigitalOut MOTOR3_EN,
+             float *speed) {
+    
+
+
+    // movimento para esquerda - eixo x - até o ponto do frasco
+    if (*x < xPepet && *y == yPepet) {
+        MOTOR2_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR2_CW = 0;
+        *x = (*x+1);
+    }
+        
+    // movimento para direita - eixo x - até o ponto do frasco
+    if (*x > xPepet && *y == yPepet) {
+        MOTOR2_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR2_CW = 1;
+        *x = (*x+1);
+    }
+
+    // movimento para baixo - eixo y - até o ponto do frasco
+    if (*y < yPepet && *x == xPepet) {
+        MOTOR1_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR1_CW = 1;
+        *y = (*y+1);
+    }
+
+    // movimento para cima - eixo y - até o ponto do frasco
+    if (*y > yPepet && *x == xPepet) {
+        MOTOR1_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR1_CW = 0;
+        *y = (*y+1);
+    }
+        
+
+        
+
+    //************I**************************************MOVIMENTAÇÃO INTERPOLADA*****************************************************
+    // movimento de xy no primeiro quadrante em ida
+    if (*x < xPepet && *y < yPepet) {
+        MOTOR1_EN = 0;
+        MOTOR2_EN = 0;
+
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR1_CW = 1;
+        MOTOR2_CW = 0;
+
+        *x = (*x+1);
+        *y = (*y+1); 
+    }
+
+
+    // movimento de xy no segundo quadrante em ida
+    if (*x < xPepet && *y > yPepet) {
+        MOTOR1_EN = 0;
+        MOTOR2_EN = 0;
+
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR1_CW = 0;
+        MOTOR2_CW = 0;
+
+        *x = (*x+1);
+        *y = (*y+1);
+    }
+    
+    // movimento de xy no terceiro quadrante em ida
+    if (*x > xPepet && *y > yPepet) {
+        MOTOR1_EN = 0;
+        MOTOR2_EN = 0;
+
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR1_CW = 0;
+        MOTOR2_CW = 1;
+
+        *x = (*x+1);
+        *y = (*y+1); 
+    }
+
+    // movimento de xy no quarto quadrante em ida
+    if (*x > xPepet && *y < yPepet) {
+        MOTOR1_EN = 0;
+        MOTOR2_EN = 0;
+
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR1_CW = 1;
+        MOTOR2_CW = 1;
+
+        *x = (*x+1);
+        *y = (*y+1);
+    }
+}
+//********************************************************TERMINO DA VOLTA**********************************************************
+
+
+
+
