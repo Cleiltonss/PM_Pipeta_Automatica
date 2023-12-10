@@ -500,7 +500,7 @@ int main() {
 
 
     // INÍCIO DA PIPETAGEM
-    for (int i = 0; i < n_frascos; i++) {
+    /*for (int i = 0; i < n_frascos; i++) {
         int xPeppet = pPeppet[i][0];
         int yPeppet = pPeppet[i][1];
         int zPeppet = pPeppet[i][2];
@@ -586,7 +586,7 @@ int main() {
 
      
         }
-    }
+    }*/
 
 
 }
