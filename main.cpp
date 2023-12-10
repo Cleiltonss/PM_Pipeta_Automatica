@@ -93,7 +93,11 @@ int main() {
 
     MOTOR1_EN = 1;
     MOTOR2_EN = 1;
+<<<<<<< HEAD
     MOTOR3_EN = 1; // enable do eixo z. Aciona em 1
+=======
+    MOTOR3_EN = 0; // enable do eixo z. Aciona em 1
+>>>>>>> 5c0de22dde1c8f602ac3fb9b68b8ca580c8faa38
 
     // variáveis estados iniciais
     LED_B = 0;
@@ -105,6 +109,7 @@ int main() {
     // Motores
     DigitalIn fdc[3][2] = {{fdcx1, fdcx2}, {fdcy1, fdcy2},  {fdcz1, fdcz2}}; // Lista que armazena os valores de cada fdc para cada eixo
     int position[3] = {0, 0, 0};
+<<<<<<< HEAD
     int pPeppet[9][4] = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, 
                         {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0}};
 
@@ -119,6 +124,36 @@ int main() {
         //             MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN,  
         //             button_g,
         //             LED_Y, LED_G);
+=======
+    int pPeppet[9][4] ={{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, 
+                        {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0}};
+
+    MOTOR_CLK.write(0.5); // Duty cicle para 50%
+    MOTOR_CLK.period(0.005); // *speed inicial igual a 0.01
+ 
+    int i = 0;
+    while (i < 1) {
+        // start_ref(button_g, LED_Y);
+        // REFERENCING(fdc, position,
+        //             MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN,  
+        //             button_g,
+        //             LED_Y, LED_G);
+        
+
+        JOG(xAxis, yAxis, 
+            MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN, 
+            position, &step_jog, 
+            button_g, 
+            LED_B, LED_G,
+            pCollect, pPepet,
+            &n_frascos, &index, &loop
+            );
+        i++;
+        // // printf("SAI DO JOG!");
+        // AUT_PEPETTING(&n_frascos, pCollect, pPepet, position, 
+        //               MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR1_EN, MOTOR2_EN,
+        //               rele);
+>>>>>>> 5c0de22dde1c8f602ac3fb9b68b8ca580c8faa38
         break;
     }
     //**********************************************************REFERENCIAMENTO************************************************************

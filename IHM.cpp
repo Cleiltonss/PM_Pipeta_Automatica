@@ -590,7 +590,11 @@ void start_NumFlask(DigitalIn button_g, int *n_frascos, DigitalOut LED_B,
 
     // botão vermelho no display: subtrair
     if (tp.x < 460 && tp.x > 160 && tp.y > 440 && tp.y < 660) {
+<<<<<<< HEAD
     //   printf("\rTA NO -\n");
+=======
+      printf("\rTA NO -\n");
+>>>>>>> 5c0de22dde1c8f602ac3fb9b68b8ca580c8faa38
       clean_start_NumFlask();
       if (*n_frascos > 0) {
         *n_frascos = *n_frascos - 1;
@@ -604,7 +608,11 @@ void start_NumFlask(DigitalIn button_g, int *n_frascos, DigitalOut LED_B,
 
     // botão verde no display: adicionar
     if (tp.x < 450 && tp.x > 160 && tp.y > 150 && tp.y < 350) {
+<<<<<<< HEAD
     //   printf("\rTA NO +\n");
+=======
+      printf("\rTA NO +\n");
+>>>>>>> 5c0de22dde1c8f602ac3fb9b68b8ca580c8faa38
       clean_start_NumFlask();
       if (*n_frascos < 9 && *n_frascos >= 0) {
         *n_frascos = *n_frascos + 1;
@@ -688,7 +696,11 @@ int start_FlaskH(int value, DigitalIn button_g, DigitalOut LED_B, int *index) {
   tft.setTextColor(MAGENTA);
   tft.setTextSize(3);
   tft.printf("\r%i", value);
+<<<<<<< HEAD
 //   printf("\r%i\n", value);
+=======
+  printf("\r%i\n", value);
+>>>>>>> 5c0de22dde1c8f602ac3fb9b68b8ca580c8faa38
   while (1) {
 
     // numero total de frascos
@@ -715,7 +727,11 @@ int start_FlaskH(int value, DigitalIn button_g, DigitalOut LED_B, int *index) {
       tft.setTextColor(MAGENTA);
       tft.setTextSize(3);
       tft.printf("\r%i", value);
+<<<<<<< HEAD
     //   printf("\r%i\n", value);
+=======
+      printf("\r%i\n", value);
+>>>>>>> 5c0de22dde1c8f602ac3fb9b68b8ca580c8faa38
     }
 
     // botão verde no display: adicionar

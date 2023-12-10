@@ -11,7 +11,11 @@ int JOG(AnalogIn xAxis, AnalogIn yAxis,
         DigitalIn button_g,
         DigitalOut LED_B, DigitalOut LED_G,
         int pCollect[4], int pPepet[][4],
+<<<<<<< HEAD
         int *n_frascos, int *index, float *speed);
+=======
+        int *n_frascos, int *index, int *loop);
+>>>>>>> 5c0de22dde1c8f602ac3fb9b68b8ca580c8faa38
 
 #endif
 
