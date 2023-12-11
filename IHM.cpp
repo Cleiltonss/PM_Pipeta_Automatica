@@ -408,7 +408,7 @@ void dur_pCollectZ() {
 
 
 // FUNÇÃO PARA DEFINIR A ALTURA DE COLETA!
-void start_pCollectH(int position[3], DigitalIn button_g, DigitalOut LED_B) {
+void start_pCollectH(int position[3], DigitalIn button_g, DigitalOut LED_B, InterruptIn button_emerg) {
     // Primeira parte - Tela 1
     //mensagem: DEFINIR ALTURA DE COLETA 
     tft.fillRoundRect(10, 20, 300, 200, 1, BLACK);
@@ -450,7 +450,7 @@ void start_pCollectH(int position[3], DigitalIn button_g, DigitalOut LED_B) {
     tft.printf("\r%i", position[1]);
     
 
-    while (1) {
+    while (button_emerg == 1) {
 
         tp = ts.getPoint();
         YPout.output();
@@ -488,7 +488,7 @@ void start_pCollectH(int position[3], DigitalIn button_g, DigitalOut LED_B) {
 
 
         // LED AZUL PISCANDO - Não pode chamar a funçaõ flasher, pois necessitaria de um novo pressionar VERDE para pultar etapa
-        if (button_g == 1) {
+        if (button_g == 1 ) {
             LED_B = 0;
         } else {
             LED_B = 1;
@@ -496,7 +496,7 @@ void start_pCollectH(int position[3], DigitalIn button_g, DigitalOut LED_B) {
         }
         wait(0.1);
 
-        if (button_g == 1) {
+        if (button_g == 1 ) {
             LED_B = 1;
             
         } else {
@@ -531,7 +531,7 @@ void end_pCollectH(DigitalIn button_g, DigitalOut LED_B, DigitalOut LED_G) {
 
 // Selecionar o número total de frascos para pipetagem - tela tft
 void start_NumFlask(DigitalIn button_g, int *n_frascos, DigitalOut LED_B,
-                    DigitalOut LED_G) {
+                    DigitalOut LED_G, InterruptIn button_emerg) {
   clean();
 
   // Primeira parte - Tela 1
@@ -575,7 +575,7 @@ void start_NumFlask(DigitalIn button_g, int *n_frascos, DigitalOut LED_B,
   tft.setTextSize(3);
   tft.printf("\r%i", *n_frascos);
 
-  while (1) {
+  while (button_emerg == 1) {
 
     // numero total de frascos
     tp = ts.getPoint();
@@ -639,7 +639,7 @@ void start_NumFlask(DigitalIn button_g, int *n_frascos, DigitalOut LED_B,
 // Selecionar o número total de frascos para pipetagem - TELA TOUCHSCREEN -
 
 
-int start_FlaskH(int value, DigitalIn button_g, DigitalOut LED_B, int *index) {
+int start_FlaskH(int value, DigitalIn button_g, DigitalOut LED_B, int *index, InterruptIn button_emerg) {
 
   // mensagem: Salvar XY para Frascos
   clean();
@@ -692,7 +692,7 @@ int start_FlaskH(int value, DigitalIn button_g, DigitalOut LED_B, int *index) {
   tft.printf("\r%i", value);
 //   printf("\r%i\n", value);
   printf("\r%i\n", value);
-  while (1) {
+  while (button_emerg == 1) {
 
     // numero total de frascos
     tp = ts.getPoint();
@@ -830,14 +830,14 @@ void start_FlaskPositionZ(int index) {
 
 }
 
-void start_FlaskPositionUpdateZ(int y) {
-    if (abs(y) % 10 == 0) {
+void start_FlaskPositionUpdateZ(int z) {
+    if (abs(z) % 10 == 0) {
         clean_start_FlaskPositionUpdate();
 
         tft.setTextColor(WHITE);
         tft.setTextSize(2);
         tft.setCursor(240, 100); // Orientação X,Y
-        tft.printf("%.3i", y);
+        tft.printf("%.3i", z);
         // printf("\rESTÁ NO UPDATE CERTO!\n");
     }
 }

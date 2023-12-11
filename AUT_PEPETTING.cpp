@@ -19,9 +19,10 @@ void UP(int *z,
     MOTOR_CLK = 1;
     wait(*speed);
 
-    MOTOR3_CW = 1;
+    MOTOR3_CW = 0;
 
-    *z = (*z-1);
+    *z = (*z+1);
+    // printf("\rValor de Z na subida: %i\n", *z);
 }
 
 // Função que realiza a descida da pipeta
@@ -33,14 +34,14 @@ void DOWN(int *z,
 
 
     // movimento para baixo de descida - eixo z
-    MOTOR3_EN = 1;
-    MOTOR_CLK = 1;
-    wait(*speed);
+    MOTOR3_EN = 0;
     MOTOR_CLK = 0;
     wait(*speed);
+    MOTOR_CLK = 1;
+    wait(*speed);
 
-    MOTOR3_CW = 0;
-    *z = (*z+1);
+    MOTOR3_CW = 1;
+    *z = (*z-1);
 }
 
 
@@ -57,7 +58,19 @@ void RETURN(int *x, int *y, int xCollect, int yCollect,
 
 
     // movimento para esquerda - eixo x - até o ponto de coleta
-    if (*x > xCollect && *y == yCollect) {
+    if (*x > xCollect) {
+        MOTOR2_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR2_CW = 1;
+        *x = (*x-1);
+    }
+
+
+    if (*x > xCollect && xCollect < 0) {
         MOTOR2_EN = 0; 
         MOTOR_CLK = 0;
         wait(*speed);
@@ -69,7 +82,7 @@ void RETURN(int *x, int *y, int xCollect, int yCollect,
     }
         
     // movimento para direita - eixo x - até o ponto de coleta
-    if (*x < xCollect && *y == yCollect) {
+    if (*x < xCollect && xCollect >= 0) {
         MOTOR2_EN = 0; 
         MOTOR_CLK = 0;
         wait(*speed);
@@ -77,11 +90,23 @@ void RETURN(int *x, int *y, int xCollect, int yCollect,
         wait(*speed);
 
         MOTOR2_CW = 0;
-        *x = (*x-1);
+        *x = (*x+1);
+    }
+
+    // movimento para direita - eixo x - até o ponto de coleta
+    if (*x < xCollect && xCollect < 0) {
+        MOTOR2_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR2_CW = 0;
+        *x = (*x+1);
     }
 
     // movimento para baixo - eixo y - até o ponto de coleta
-    if (*y > yCollect && *x == xCollect) {
+    if (*y > yCollect) {
         MOTOR1_EN = 0; 
         MOTOR_CLK = 0;
         wait(*speed);
@@ -93,87 +118,41 @@ void RETURN(int *x, int *y, int xCollect, int yCollect,
     }
 
     // movimento para cima - eixo y - até o ponto de coleta
-    if (*y < yCollect && *x == xCollect) {
+    if (*y > yCollect && yCollect < 0) {
         MOTOR1_EN = 0; 
         MOTOR_CLK = 0;
         wait(*speed);
         MOTOR_CLK = 1;
         wait(*speed);
-
-        MOTOR1_CW = 1;
-        *y = (*y-1);
-    }
+        MOTOR1_CW = 0;
         
-
-
-    //**********************************************************MOVIMENTAÇÃO INTERPOLADA**********************************************
-    // movimento de xy no primeiro quadrante em retorno
-    if (*x > xCollect && *y > yCollect) {
-        MOTOR1_EN = 0;
-        MOTOR2_EN = 0;
-
-        MOTOR_CLK = 0;
-        wait(*speed);
-        MOTOR_CLK = 1;
-        wait(*speed);
-
-        MOTOR1_CW = 0;
-        MOTOR2_CW = 1;
-
-        *x = (*x-1);
-        *y = (*y-1); 
+        *y = (*y-1);
     }
 
-    // movimento de xy no segundo quadrante em retorno
-    if (*x > xCollect && *y < yCollect) {
-        MOTOR1_EN = 0;
-        MOTOR2_EN = 0;
-
+    // movimento para cima - eixo y - até o ponto de coleta
+    if (*y < yCollect && yCollect >= 0) {
+        MOTOR1_EN = 0; 
         MOTOR_CLK = 0;
         wait(*speed);
         MOTOR_CLK = 1;
         wait(*speed);
-
         MOTOR1_CW = 1;
-        MOTOR2_CW = 1;
-
-        *x = (*x-1);
-        *y = (*y-1);
+        
+        *y = (*y+1);
     }
-    
-    // movimento de xy no terceiro quadrante em retorno
-    if (*x < xCollect && *y < yCollect) {
-        MOTOR1_EN = 0;
-        MOTOR2_EN = 0;
 
+    // movimento para cima - eixo y - até o ponto de coleta
+    if (*y < yCollect && yCollect < 0) {
+        MOTOR1_EN = 0; 
         MOTOR_CLK = 0;
         wait(*speed);
         MOTOR_CLK = 1;
         wait(*speed);
-
         MOTOR1_CW = 1;
-        MOTOR2_CW = 0;
-
-        *x = (*x-1);
-        *y = (*y-1);
+        
+        *y = (*y+1);
     }
 
-    // movimento de xy no quarto quadrante em retorno
-    if (*x < xCollect && *y > yCollect) {
-        MOTOR1_EN = 0;
-        MOTOR2_EN = 0;
-
-        MOTOR_CLK = 0;
-        wait(*speed);
-        MOTOR_CLK = 1;
-        wait(*speed);
-
-        MOTOR1_CW = 0;
-        MOTOR2_CW = 0;
-
-        *x = (*x-1);
-        *y = (*y-1);
-    }
 }
 //********************************************************TERMINO DO RETORNO**********************************************************
 
@@ -187,128 +166,107 @@ void TAKE(int xPepet, int yPepet, int *x, int *y,
              DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, DigitalOut MOTOR3_EN,
              float *speed) {
     
-
-
-    // movimento para esquerda - eixo x - até o ponto do frasco
-    if (*x < xPepet && *y == yPepet) {
-        MOTOR2_EN = 0; 
-        MOTOR_CLK = 0;
-        wait(*speed);
-        MOTOR_CLK = 1;
-        wait(*speed);
-
-        MOTOR2_CW = 0;
-        *x = (*x+1);
-    }
-        
-    // movimento para direita - eixo x - até o ponto do frasco
-    if (*x > xPepet && *y == yPepet) {
-        MOTOR2_EN = 0; 
-        MOTOR_CLK = 0;
-        wait(*speed);
-        MOTOR_CLK = 1;
-        wait(*speed);
-
-        MOTOR2_CW = 1;
-        *x = (*x+1);
-    }
-
-    // movimento para baixo - eixo y - até o ponto do frasco
-    if (*y < yPepet && *x == xPepet) {
-        MOTOR1_EN = 0; 
-        MOTOR_CLK = 0;
-        wait(*speed);
-        MOTOR_CLK = 1;
-        wait(*speed);
-
-        MOTOR1_CW = 1;
-        *y = (*y+1);
-    }
-
-    // movimento para cima - eixo y - até o ponto do frasco
-    if (*y > yPepet && *x == xPepet) {
-        MOTOR1_EN = 0; 
-        MOTOR_CLK = 0;
-        wait(*speed);
-        MOTOR_CLK = 1;
-        wait(*speed);
-
-        MOTOR1_CW = 0;
-        *y = (*y+1);
-    }
-        
-
-        
-
-    //************I**************************************MOVIMENTAÇÃO INTERPOLADA*****************************************************
-    // movimento de xy no primeiro quadrante em ida
-    if (*x < xPepet && *y < yPepet) {
-        MOTOR1_EN = 0;
-        MOTOR2_EN = 0;
-
-        MOTOR_CLK = 0;
-        wait(*speed);
-        MOTOR_CLK = 1;
-        wait(*speed);
-
-        MOTOR1_CW = 1;
-        MOTOR2_CW = 0;
-
-        *x = (*x+1);
-        *y = (*y+1); 
-    }
-
-
-    // movimento de xy no segundo quadrante em ida
-    if (*x < xPepet && *y > yPepet) {
-        MOTOR1_EN = 0;
-        MOTOR2_EN = 0;
-
-        MOTOR_CLK = 0;
-        wait(*speed);
-        MOTOR_CLK = 1;
-        wait(*speed);
-
-        MOTOR1_CW = 0;
-        MOTOR2_CW = 0;
-
-        *x = (*x+1);
-        *y = (*y+1);
-    }
     
-    // movimento de xy no terceiro quadrante em ida
-    if (*x > xPepet && *y > yPepet) {
-        MOTOR1_EN = 0;
-        MOTOR2_EN = 0;
 
+    // movimento para esquerda - eixo x - até o ponto de coleta
+    if (*x > xPepet) {
+        MOTOR2_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR2_CW = 1;
+        *x = (*x-1);
+    }
+
+        
+    // movimento para direita - eixo x - até o ponto de coleta
+    if (*x < xPepet && xPepet >= 0) {
+        MOTOR2_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR2_CW = 0;
+        *x = (*x+1);
+    }
+
+    // movimento para direita - eixo x - até o ponto de coleta
+    if (*x < xPepet && xPepet < 0) {
+        MOTOR2_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR2_CW = 0;
+        *x = (*x+1);
+    }
+
+    // movimento para direita - eixo x - até o ponto de coleta
+    if (*x > xPepet && xPepet < 0) {
+        MOTOR2_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+
+        MOTOR2_CW = 1;
+        *x = (*x-1);
+    }
+
+    // movimento para baixo - eixo y - até o ponto de coleta
+    if (*y > yPepet) {
+        MOTOR1_EN = 0; 
         MOTOR_CLK = 0;
         wait(*speed);
         MOTOR_CLK = 1;
         wait(*speed);
 
         MOTOR1_CW = 0;
-        MOTOR2_CW = 1;
-
-        *x = (*x+1);
-        *y = (*y+1); 
+        *y = (*y-1);
     }
 
-    // movimento de xy no quarto quadrante em ida
-    if (*x > xPepet && *y < yPepet) {
-        MOTOR1_EN = 0;
-        MOTOR2_EN = 0;
-
+    // movimento para cima - eixo y - até o ponto de coleta
+    if (*y < yPepet && yPepet >= 0) {
+        MOTOR1_EN = 0; 
         MOTOR_CLK = 0;
         wait(*speed);
         MOTOR_CLK = 1;
         wait(*speed);
-
         MOTOR1_CW = 1;
-        MOTOR2_CW = 1;
-
-        *x = (*x+1);
+        
         *y = (*y+1);
     }
+
+    // movimento para cima - eixo y - até o ponto de coleta
+    if (*y < yPepet && yPepet < 0) {
+        MOTOR1_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+        MOTOR1_CW = 1;
+        
+        *y = (*y+1);
+    }
+
+    // movimento para cima - eixo y - até o ponto de coleta
+    if (*y > yPepet && yPepet < 0) {
+        MOTOR1_EN = 0; 
+        MOTOR_CLK = 0;
+        wait(*speed);
+        MOTOR_CLK = 1;
+        wait(*speed);
+        MOTOR1_CW = 0;
+        
+        *y = (*y-1);
+    }
+        
+
+        
 }
 //********************************************************TERMINO DA VOLTA**********************************************************
 
