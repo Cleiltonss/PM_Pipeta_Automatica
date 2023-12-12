@@ -7,12 +7,12 @@ void REFERENCING(DigitalIn fdc[][2], int position[3],
                  DigitalOut MOTOR1_CW, DigitalOut MOTOR2_CW, DigitalOut MOTOR3_CW, 
                  DigitalOut MOTOR1_EN, DigitalOut MOTOR2_EN, DigitalOut MOTOR3_EN, 
                  DigitalIn button_g,
-                 DigitalOut LED_Y, DigitalOut LED_G, float *speed) {
+                 DigitalOut LED_Y, DigitalOut LED_G, float *speed, InterruptIn button_emerg) {
                     
                     dur_ref();
-
+                        
                     // eixo z
-                    while(1) {
+                    while(button_emerg == 1) {
 
                         // printf("\rENTROU\n");
                         MOTOR_CLK = 0;
@@ -28,7 +28,7 @@ void REFERENCING(DigitalIn fdc[][2], int position[3],
 
                         if (fdc[2][0] == 0 /*|| fdc[2][1] == 0*/) {
                             // printf("\rENTROU RETORNO DE Z!!\n");
-                            while(1) {
+                            while(button_emerg == 1) {
                                 if (fdc[2][0] == 0 /*|| fdc[2][1] == 0*/) {
                                     // printf("\rRETORNANDO Z!\n");
                                     MOTOR3_EN = 0;
@@ -46,7 +46,7 @@ void REFERENCING(DigitalIn fdc[][2], int position[3],
 
                     
                     // eixo x
-                    while(1) {
+                    while(button_emerg == 1) {
 
                         MOTOR_CLK = 0;
                         wait(*speed);
@@ -61,7 +61,7 @@ void REFERENCING(DigitalIn fdc[][2], int position[3],
 
                         if (fdc[0][0] == 0 || fdc[0][1] == 0) {
                             // printf("\rENTROU RETORNO X!\n");
-                            while(1) {
+                            while(button_emerg == 1) {
                                 if (fdc[0][0] == 0 || fdc[0][1] == 0) {
                                     // printf("\rTA RETORNANDO X!\n");
                                     MOTOR1_EN = 0;
@@ -79,7 +79,7 @@ void REFERENCING(DigitalIn fdc[][2], int position[3],
 
                     
                     // eixo y
-                    while(1) {
+                    while(button_emerg == 1) {
 
                         MOTOR_CLK = 0;
                         wait(*speed);
@@ -95,7 +95,7 @@ void REFERENCING(DigitalIn fdc[][2], int position[3],
 
                         if (fdc[1][0] == 0 || fdc[1][1] == 0) {
                             // printf("\rENTROU NO RETORNO Y!\n");
-                            while(1) {
+                            while(button_emerg == 1) {
                                 if (fdc[1][0] == 0 || fdc[1][1] == 0) {
                                     // printf("\rRETORNANDO Y!\n");
                                     MOTOR2_EN = 0;

@@ -124,31 +124,33 @@ void clean_start_FlaskH() {
 
 void clean_start_FlaskPositionUpdate() {
     // retângulo mensagem: PRESSIONE VERDE
-    tft.fillRoundRect(232, 57, 260, 120, 3, RED); 
+    tft.fillRoundRect(232, 57, 287, 120, 3, RED); 
 }
 
 
 // Função para setar o start da tela tft
-void start() {
-  // Inicializando o display
-  tft.reset(); // reseta tudo do display
-  tft.begin(); // inicializa o display
-  tft.setRotation(
-      Orientation); // Seta a direção da tela na horizontal: Orientation = 1
-  tft.fillScreen(PINK); // Fundo do Display - Fundo da tela
+void start(InterruptIn button_emerg) {
+  if (button_emerg == 1) {
+    // Inicializando o display
+    tft.reset(); // reseta tudo do display
+    tft.begin(); // inicializa o display
+    tft.setRotation(Orientation); // Seta a direção da tela na horizontal: Orientation = 1
+    tft.fillScreen(PINK); // Fundo do Display - Fundo da tela
+  }
 }
 
 //**********************************************************REFERENCING******************************************************///
-void start_ref(DigitalIn button_g, DigitalOut LED_Y) {
+void start_ref(DigitalIn button_g, DigitalOut LED_Y, InterruptIn button_emerg) {
 
-  start();
+  start(button_emerg);
 
   // mensagem: HELLO!
   tft.setTextColor(MAROON); // Seta a cor do texto
   tft.setTextSize(3);       // Tamanho do Texto no Display
 
   // movimento da mensagem: HELLO!
-  for (int i = 0; i < 10; i++) {
+  int i = 0;
+  while (i < 10 && button_emerg == 1) {
     if (i == 0 or i == 5) {
       tft.setCursor(110, 90);
     }
@@ -170,37 +172,40 @@ void start_ref(DigitalIn button_g, DigitalOut LED_Y) {
     }
 
     tft.println("Hello!");
+    i++;
     delay(70);
     clean();
   }
-  printf("\rHELLOW!\n");
-  tft.setCursor(110, 100); //  Orientação do texto X,Y
-  tft.println("Hello!");
-  delay(1000);
+  if (button_emerg == 1) {
+    printf("\rHELLOW!\n");
+    tft.setCursor(110, 100); //  Orientação do texto X,Y
+    tft.println("Hello!");
+    delay(1000);
 
-  clean();
+    clean();
 
-  // mensagem: Deseja Referenciar?
-  tft.setTextColor(PINK);
-  tft.setTextColor(DARKCYAN);
-  tft.setCursor(110, 40);
-  tft.println("Deseja");
-  tft.setCursor(60, 70);
-  tft.println("Referenciar?");
+    // mensagem: Deseja Referenciar?
+    tft.setTextColor(PINK);
+    tft.setTextColor(DARKCYAN);
+    tft.setCursor(110, 40);
+    tft.println("Deseja");
+    tft.setCursor(60, 70);
+    tft.println("Referenciar?");
 
-  // retângulo mensagem: PRESSIONE VERDE
-  tft.fillRoundRect(15, 107, 287, 122, 3,
-                    GREEN); // (x,y,x1,y1,s) : EFEITO DE BORDA
-  tft.fillRoundRect(18, 110, 281, 116, 1, DARKGREEN); // (x,y,x1,y1,s)
-  tft.setTextColor(WHITE);
-  tft.setTextSize(2);
-  tft.setCursor(75, 155); // Orientação X,Y
-  tft.println("PRESSIONE VERDE");
+    // retângulo mensagem: PRESSIONE VERDE
+    tft.fillRoundRect(15, 107, 287, 122, 3,
+                        GREEN); // (x,y,x1,y1,s) : EFEITO DE BORDA
+    tft.fillRoundRect(18, 110, 281, 116, 1, DARKGREEN); // (x,y,x1,y1,s)
+    tft.setTextColor(WHITE);
+    tft.setTextSize(2);
+    tft.setCursor(75, 155); // Orientação X,Y
+    tft.println("PRESSIONE VERDE");
+  }
 
   // Led amarelo pulsando até que, ao pressionar o botão verde, se torna
   // contínuo
-  while (1) {
-    if (button_g == 1) {
+  while (button_emerg == 1) {
+    if (button_g == 1 && button_emerg == 1) {
       LED_Y = 0;
 
     } else {
@@ -210,7 +215,7 @@ void start_ref(DigitalIn button_g, DigitalOut LED_Y) {
 
     wait(0.1);
 
-    if (button_g == 1) {
+    if (button_g == 1 && button_emerg == 1) {
       LED_Y = 1;
 
     } else {
@@ -264,10 +269,10 @@ void end_ref(DigitalOut LED_Y, DigitalOut LED_G) {
 //**************************************************************JOG**********************************************************///
 
 // Função para pisca o led azul
-void flasher(DigitalIn button_g, DigitalOut LED_B) {
+void flasher(DigitalIn button_g, DigitalOut LED_B, InterruptIn button_emerg) {
   // Led azul pulsando até que, ao pressionar o botão verde, se torna contínuo
-  while (1) {
-    if (button_g == 1) {
+  while (button_emerg) {
+    if (button_g == 1 && button_emerg == 1) {
       LED_B = 0;
 
     } else {
@@ -277,7 +282,7 @@ void flasher(DigitalIn button_g, DigitalOut LED_B) {
 
     wait(0.1);
 
-    if (button_g == 1) {
+    if (button_g == 1 && button_emerg == 1) {
       LED_B = 1;
 
     } else {
@@ -289,33 +294,37 @@ void flasher(DigitalIn button_g, DigitalOut LED_B) {
   }
 }
 
-void start_pCollect(DigitalIn button_g, DigitalOut LED_B, DigitalOut LED_G) {
-  start(); // RETIRAR
+void start_pCollect(DigitalIn button_g, DigitalOut LED_B, DigitalOut LED_G, InterruptIn button_emerg) {
   LED_G = 0;
   // mensagem: DEFINA PONTO DE COLETA
   tft.setTextSize(3);
   tft.setTextColor(DARKCYAN);
   char coleta[7] = {"COLETA"};
 
-  for (int i = 0; i < 116; i = i + 2) {
+  int i = 0;
+  while (i < 116 && button_emerg == 1) {
     clean();
     tft.setCursor(i, 180);
     for (int j = 0; j < 7; j++) {
       tft.printf("%c", coleta[j]);
     }
+    i = i + 2;
     delay(1);
   }
-  tft.setTextColor(PURPLE);
-  tft.setCursor(55, 30);
-  tft.println("DEFINA PONTO");
-  tft.setCursor(155, 110);
-  tft.println("DE");
-  delay(2000);
+  if (button_emerg == 1) {
+    tft.setTextColor(PURPLE);
+    tft.setCursor(55, 30);
+    tft.println("DEFINA PONTO");
+    tft.setCursor(155, 110);
+    tft.println("DE");
+    delay(2000);
+  }
 
   clean();
   // mensagem: DEFINA PONTO DE COLETA: XY
   tft.setTextSize(3);
-  for (int i = 0; i < 10; i++) {
+  i = 0;
+  while (i < 10 && button_emerg == 1) {
     clean();
     if (i == 0) {
       tft.setTextColor(YELLOW);
@@ -350,23 +359,26 @@ void start_pCollect(DigitalIn button_g, DigitalOut LED_B, DigitalOut LED_G) {
     tft.setCursor(50, 50);
     tft.println("DEFINA X e Y");
     delay(50);
+    i++;
   }
 
   delay(200);
 
-  // retângulo mensagem: PRESSIONE VERDE PARA CONTINUAR
-  tft.fillRoundRect(15, 107, 287, 122, 3,
-                    GREEN); // (x,y,x1,y1,s) : EFEITO DE BORDA
-  tft.fillRoundRect(18, 110, 281, 116, 1, DARKGREEN); // (x,y,x1,y1,s)
-  tft.setTextColor(WHITE);
-  tft.setTextSize(2);
-  tft.setCursor(70, 155); // Orientação X,Y
-  tft.println("PRESSIONE VERDE");
+  if (button_emerg == 1) {
+    // retângulo mensagem: PRESSIONE VERDE PARA CONTINUAR
+    tft.fillRoundRect(15, 107, 287, 122, 3,
+                        GREEN); // (x,y,x1,y1,s) : EFEITO DE BORDA
+    tft.fillRoundRect(18, 110, 281, 116, 1, DARKGREEN); // (x,y,x1,y1,s)
+    tft.setTextColor(WHITE);
+    tft.setTextSize(2);
+    tft.setCursor(70, 155); // Orientação X,Y
+    tft.println("PRESSIONE VERDE");
+  }
 
-  flasher(button_g, LED_B);
+  flasher(button_g, LED_B, button_emerg);
 }
 
-void end_pCollectXY(DigitalIn button_g, DigitalOut LED_B) {
+void end_pCollectXY(DigitalIn button_g, DigitalOut LED_B, InterruptIn button_emerg) {
   clean();
 
   tft.fillRoundRect(10, 40, 300, 50, 1, BLACK);
@@ -382,7 +394,7 @@ void end_pCollectXY(DigitalIn button_g, DigitalOut LED_B) {
   tft.setTextSize(2);
   tft.setCursor(70, 155); // Orientação X,Y
   tft.println("PRESSIONE VERDE");
-  flasher(button_g, LED_B);
+  flasher(button_g, LED_B, button_emerg);
   wait(1);
 }
 
@@ -778,7 +790,7 @@ void start_FlaskPosition(int index, int x, int y) {
 
     // retângulo mensagem: PRESSIONE VERDE
     tft.fillScreen(BLACK);
-    tft.fillRoundRect(0, 57, 287, 120, 3, RED); // (x,y,x1,y1,s) : EFEITO DE BORDA
+    tft.fillRoundRect(0, 57, 320, 120, 3, RED); // (x,y,x1,y1,s) : EFEITO DE BORDA
     tft.setTextColor(WHITE);
     tft.setTextSize(2);
     tft.setCursor(40, 65); // Orientação X,Y
@@ -823,7 +835,7 @@ void start_FlaskPositionZ(int index) {
 
     // retângulo mensagem: PRESSIONE VERDE
     tft.fillScreen(BLACK);
-    tft.fillRoundRect(0, 57, 287, 120, 3, RED); // (x,y,x1,y1,s) : EFEITO DE BORDA
+    tft.fillRoundRect(0, 57, 320, 120, 3, RED); // (x,y,x1,y1,s) : EFEITO DE BORDA
     tft.setTextColor(WHITE);
     tft.setTextSize(2);
     tft.setCursor(40, 100); // Orientação X,Y
@@ -841,6 +853,16 @@ void start_FlaskPositionUpdateZ(int z) {
         tft.printf("%.3i", z);
         // printf("\rESTÁ NO UPDATE CERTO!\n");
     }
+}
+
+void emergIHM() {
+    tft.fillScreen(RED);
+    tft.setTextColor(WHITE);
+    tft.setTextSize(4);
+    tft.setCursor(40, 100); 
+    tft.printf("EMERGENCIA");
+    tft.drawRoundRect(10, 10, 300, 210, 4, WHITE); 
+    tft.drawRoundRect(9, 11, 302, 210, 4, WHITE);
 }
 
 // void clean_start_LOAD() {

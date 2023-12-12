@@ -87,16 +87,21 @@ void high_speed() {
 
 //****************************************************ESTADO DE EMERGÊNCIA*************************************************************
 void emergON() {
+    LED_B = 1;
+    LED_G = 1;
+    LED_R = 1;
+    LED_Y = 1;
+    LED_R_EMERG = 0;
 
     MOTOR1_EN = 1;
     MOTOR2_EN = 1;
     MOTOR3_EN = 1;
     rele2 = 1; // se for normalmente fechado
     buzzer = 1;
-
 }
 void emergOFF() {
     // printf("\rSAIU DA EMERGENCIA\n");
+    LED_R_EMERG = 1;
     buzzer = 0;
     rele2 = 0; // se for normalmente fechado
     stateEmerg = 1;
@@ -107,21 +112,13 @@ void emergOFF() {
 
 
 //*************************************************************BLUETOOTH************************************************************
-volatile char c = 'n';
-bool charReceived;
 
-
-void onCharReceived(){
-    c = pc.getc();
-    pc.putc(c);
-}
 
 
 
 
 
 int main() {
-    pc.attach(&onCharReceived, Serial::RxIrq);
 
 
     // Define periodo dos motores - botão azul pressionado aumenta a velocidade e, ao soltar, retorna a velocidade original
@@ -144,25 +141,29 @@ int main() {
 
 
     // Motores
-    DigitalIn fdc[3][2] = {{fdcx1, fdcx2}, {fdcy1, fdcy2},  {fdcz1, fdcz2}}; // Lista que armazena os valores de cada fdc para cada eixo
+    DigitalIn fdc[6] = {fdcx1, fdcx2, fdcy1, fdcy2, fdcz1, fdcz2}; // Lista que armazena os valores de cada fdc para cada eixo
     int position[3] = {0, 0, 0};
 
-    
-    
 
 
-
-    //**********************************************************REFERENCIAMENTO************************************************************
     while(1) {
-        // start_ref(button_g, LED_Y);
-        // REFERENCING(fdc, position,
-        //             MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN,  
-        //             button_g,
-        //             LED_Y, LED_G, &speed);
+        if (button_emerg == 0) {
+            emergIHM();
+        } 
+
+        while (button_emerg == 0) {
+            
+        } 
+
     //**********************************************************REFERENCIAMENTO************************************************************
- 
-
-
+        start_ref(button_g, LED_Y, button_emerg);
+        REFERENCING(fdc, position, 
+                    PwmOut MOTOR_CLK, 
+                    MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, 
+                    MOTOR1_EN, MOTOR2_EN, MOTOR3_EN, 
+                    button_g,
+                    LED_Y, LED_G, &speed, button_emerg);
+    //**********************************************************REFERENCIAMENTO************************************************************
 
 
 
@@ -171,11 +172,11 @@ int main() {
         int switchz = 0; // variável que muda posição joystick xy para z
         int joystick[3]; // lista com as posições x,y,z do joystick
 
-        start_pCollect(button_g, LED_B, LED_G); 
+        start_pCollect(button_g, LED_B, LED_G, button_emerg); 
         while (button_emerg == 1) {
 
             // printf("\rswitchz: %i!\n", switchz);
-            if (switchz == 0) {
+            if (switchz == 0 && button_emerg == 1) {
                 // Valores do joystick
                 joystick[0] = xAxis.read() * 1000; // float (0->1) to int (0->1000)
                 joystick[1] = yAxis.read() * 1000;
@@ -325,7 +326,7 @@ int main() {
 
             
             // Eixo Z - movimento norte e sul
-            if (switchz == 1) {
+            if (switchz == 1 && button_emerg == 1) {
                 // printf("\rvalor de switchz: %i\n",switchz);
                 
                 joystick[0] = 0;
@@ -416,7 +417,7 @@ int main() {
                 // Salva posições xy de coleta
                 if (step_jog == 1) {
                     // printf("\rPASSO 1!\n");
-                    end_pCollectXY(button_g, LED_B);
+                    end_pCollectXY(button_g, LED_B, button_emerg);
                     pCollect[0] = position[0];
                     pCollect[1] = position[1];
                     // printf("\rX de Coleta: %i\n\rY de Coleta: %i\n", pCollect[0], pCollect[1]);
