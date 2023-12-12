@@ -68,7 +68,7 @@ void clean_start_NumFlask() {
   tft.println("-");
 
   // retângulo mensagem: PRESSIONE VERDE
-  tft.fillRoundRect(18, 50, 281, 60, 1, BLUE); // (x,y,x1,y1,s)
+  tft.fillRoundRect(18, 50, 260, 60, 1, BLUE);// (x,y,x1,y1,s)
   tft.setTextColor(WHITE);
   tft.setTextSize(3);
   tft.setCursor(60, 60); // Orientação X,Y
@@ -124,7 +124,7 @@ void clean_start_FlaskH() {
 
 void clean_start_FlaskPositionUpdate() {
     // retângulo mensagem: PRESSIONE VERDE
-    tft.fillRoundRect(232, 57, 270, 120, 3, RED); 
+    tft.fillRoundRect(232, 57, 260, 120, 3, RED); 
 }
 
 
@@ -408,7 +408,7 @@ void dur_pCollectZ() {
 
 
 // FUNÇÃO PARA DEFINIR A ALTURA DE COLETA!
-void start_pCollectH(int position[3], DigitalIn button_g, DigitalOut LED_B, InterruptIn button_emerg) {
+int start_pCollectH(DigitalIn button_g, DigitalOut LED_B, InterruptIn button_emerg) {
     // Primeira parte - Tela 1
     //mensagem: DEFINIR ALTURA DE COLETA 
     tft.fillRoundRect(10, 20, 300, 200, 1, BLACK);
@@ -426,7 +426,7 @@ void start_pCollectH(int position[3], DigitalIn button_g, DigitalOut LED_B, Inte
     delay(2000);
 
     clean();
-
+    int value = 0;
     // BOTÕES DE + e -
     tft.fillCircle(190,180,40, GREEN); // X, Y, Raio, COR
     tft.setTextColor(WHITE);
@@ -447,7 +447,7 @@ void start_pCollectH(int position[3], DigitalIn button_g, DigitalOut LED_B, Inte
 
     tft.setTextColor(RED);
     tft.setCursor(170, 60); // Orientação X,Y
-    tft.printf("\r%i", position[1]);
+    tft.printf("\r%i", value);
     
 
     while (button_emerg == 1) {
@@ -465,25 +465,25 @@ void start_pCollectH(int position[3], DigitalIn button_g, DigitalOut LED_B, Inte
         if (tp.x < 450 && tp.x > 160 && tp.y > 150 && tp.y < 350) { 
             clean_start_pCollectH();
             // printf("\rTA EM +\n");
-            position[1]++;
+            value++;
 
             tft.setCursor(170, 60);
             tft.setTextColor(RED);
             tft.setTextSize(3);
-            tft.printf("\r%i", position[1]);
+            tft.printf("\r%i", value);
         }
 
         if (tp.x < 460 && tp.x > 160 && tp.y > 440 && tp.y < 660) {
             clean_start_pCollectH();
             // printf("\rTA EM -\n");
-            if (position[1] > 0) {
-                position[1]--;
+            if (value > 0) {
+                value--;
             }
 
             tft.setCursor(170, 60);
             tft.setTextColor(RED);
             tft.setTextSize(3);
-            tft.printf("\r%i", position[1]);
+            tft.printf("\r%i", value);
         }
 
 
@@ -505,6 +505,7 @@ void start_pCollectH(int position[3], DigitalIn button_g, DigitalOut LED_B, Inte
         }
         wait(0.1);
     }
+    return value;
 }
 
 void end_pCollectH(DigitalIn button_g, DigitalOut LED_B, DigitalOut LED_G) {
@@ -543,7 +544,7 @@ void start_NumFlask(DigitalIn button_g, int *n_frascos, DigitalOut LED_B,
   tft.println("DEFINIR TOTAL DE");
   tft.setTextColor(GREEN);
   tft.setTextSize(3);
-  tft.setCursor(90, 150); // Orientação X,Y
+  tft.setCursor(100, 150); // Orientação X,Y
   tft.println("FRASCOS");
   // Primeira parte - Tela 1
 
@@ -591,7 +592,7 @@ void start_NumFlask(DigitalIn button_g, int *n_frascos, DigitalOut LED_B,
     // botão vermelho no display: subtrair
     if (tp.x < 460 && tp.x > 160 && tp.y > 440 && tp.y < 660) {
     //   printf("\rTA NO -\n");
-      printf("\rTA NO -\n");
+    //   printf("\rTA NO -\n");
       clean_start_NumFlask();
       if (*n_frascos > 0) {
         *n_frascos = *n_frascos - 1;
@@ -606,7 +607,7 @@ void start_NumFlask(DigitalIn button_g, int *n_frascos, DigitalOut LED_B,
     // botão verde no display: adicionar
     if (tp.x < 450 && tp.x > 160 && tp.y > 150 && tp.y < 350) {
     //   printf("\rTA NO +\n");
-      printf("\rTA NO +\n");
+    //   printf("\rTA NO +\n");
       clean_start_NumFlask();
       if (*n_frascos < 9 && *n_frascos >= 0) {
         *n_frascos = *n_frascos + 1;
@@ -646,7 +647,7 @@ int start_FlaskH(int value, DigitalIn button_g, DigitalOut LED_B, int *index, In
   tft.setTextSize(3);
   tft.setTextColor(PINK);
   tft.setTextColor(DARKCYAN);
-  tft.setCursor(80, 15);
+  tft.setCursor(90, 15);
   tft.println("Salvar H");
   tft.setCursor(130, 50);
   tft.println("para");
@@ -691,7 +692,7 @@ int start_FlaskH(int value, DigitalIn button_g, DigitalOut LED_B, int *index, In
   tft.setTextSize(3);
   tft.printf("\r%i", value);
 //   printf("\r%i\n", value);
-  printf("\r%i\n", value);
+//   printf("\r%i\n", value);
   while (button_emerg == 1) {
 
     // numero total de frascos
@@ -765,7 +766,7 @@ void start_FlaskPosition(int index, int x, int y) {
     tft.setTextColor(DARKCYAN);
     tft.setCursor(80, 20);
     tft.println("Salvar XY");
-    tft.setCursor(120, 60);
+    tft.setCursor(115, 60);
     tft.println("para o");
     tft.setCursor(90, 100);
     tft.setTextColor(RED);
@@ -777,7 +778,7 @@ void start_FlaskPosition(int index, int x, int y) {
 
     // retângulo mensagem: PRESSIONE VERDE
     tft.fillScreen(BLACK);
-    tft.fillRoundRect(15, 57, 287, 120, 3, RED); // (x,y,x1,y1,s) : EFEITO DE BORDA
+    tft.fillRoundRect(0, 57, 287, 120, 3, RED); // (x,y,x1,y1,s) : EFEITO DE BORDA
     tft.setTextColor(WHITE);
     tft.setTextSize(2);
     tft.setCursor(40, 65); // Orientação X,Y
@@ -822,7 +823,7 @@ void start_FlaskPositionZ(int index) {
 
     // retângulo mensagem: PRESSIONE VERDE
     tft.fillScreen(BLACK);
-    tft.fillRoundRect(15, 57, 287, 120, 3, RED); // (x,y,x1,y1,s) : EFEITO DE BORDA
+    tft.fillRoundRect(0, 57, 287, 120, 3, RED); // (x,y,x1,y1,s) : EFEITO DE BORDA
     tft.setTextColor(WHITE);
     tft.setTextSize(2);
     tft.setCursor(40, 100); // Orientação X,Y

@@ -4,11 +4,10 @@
 #include "AUT_PEPETTING.h"
 #include "IHM.h"
 #include "EMERGENCY.h"
-#include <stdlib.h>
 
 
 
-Serial pc(USBTX, USBRX); // Declara o objeto pc para comunicação serial nativo
+Serial pc(SERIAL_TX, SERIAL_RX, 9600); // Declara o objeto pc para comunicação serial nativo
 
 // BOTÕES: blue, green and red
 InterruptIn button_b(PB_14); // botão de speed: normal e rapida - TA COM PROBLEMA NA COMUNICAÇÃO DE ARQUIVOS
@@ -93,28 +92,45 @@ void emergON() {
     MOTOR2_EN = 1;
     MOTOR3_EN = 1;
     rele2 = 1; // se for normalmente fechado
+    buzzer = 1;
 
 }
 void emergOFF() {
-    printf("\rSAIU DA EMERGENCIA\n");
+    // printf("\rSAIU DA EMERGENCIA\n");
     buzzer = 0;
     rele2 = 0; // se for normalmente fechado
     stateEmerg = 1;
+    buzzer = 0;
 }
 //****************************************************ESTADO DE EMERGÊNCIA*************************************************************
 
 
 
+//*************************************************************BLUETOOTH************************************************************
+volatile char c = 'n';
+bool charReceived;
+
+
+void onCharReceived(){
+    c = pc.getc();
+    pc.putc(c);
+}
+
+
+
+
+
 int main() {
+    pc.attach(&onCharReceived, Serial::RxIrq);
+
+
     // Define periodo dos motores - botão azul pressionado aumenta a velocidade e, ao soltar, retorna a velocidade original
     button_b.fall(&high_speed);
     button_b.rise(&normal_speed);
 
-    // button_emerg.fall(&emergON);
-    // button_emerg.rise(&emergOFF);
+    button_emerg.fall(&emergON);
+    button_emerg.rise(&emergOFF);
 
-    // button_emerg.fall(EMERGENCY(LED_B, LED_G, LED_Y, LED_R, LED_R_EMERG,
-    //                             MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR1_EN, MOTOR2_EN));
 
     MOTOR1_EN = 1;
     MOTOR2_EN = 1;
@@ -132,6 +148,7 @@ int main() {
     int position[3] = {0, 0, 0};
 
     
+    
 
 
 
@@ -142,17 +159,17 @@ int main() {
         //             MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN,  
         //             button_g,
         //             LED_Y, LED_G, &speed);
-        
+    //**********************************************************REFERENCIAMENTO************************************************************
+ 
 
 
 
 
 
 
-        //***************************************************************JOG*******************************************************************
+    //***************************************************************JOG*******************************************************************
         int switchz = 0; // variável que muda posição joystick xy para z
         int joystick[3]; // lista com as posições x,y,z do joystick
-        bool leave_cp = true; // Define quebra do looping total de saída
 
         start_pCollect(button_g, LED_B, LED_G); 
         while (button_emerg == 1) {
@@ -354,10 +371,7 @@ int main() {
                     pCollect[2] = position[2];
                     // printf("\rValor de Z de Coleta: %i\n", pCollect[2]);
                     // É necessário zerar a contagem para as novas medidas dos frascos
-                    position[0] = 0;
-                    position[1] = 0;
-                    position[2] = 0;
-
+                    
                     switchz = 0; // para de movimentar z 
                     step_jog = step_jog + 1; // necessário para  a próxima passada de etapa
                     // printf("\rFINALIZOU O PASSO 3!\n");
@@ -414,8 +428,7 @@ int main() {
                 // Salva a altura do ponto de coleta
                 if (step_jog == 4) {
                     // printf("\rPASSO 4!\n");
-                    start_pCollectH(position, button_g, LED_B, button_emerg); // verificar se salvou realmente a posição!
-                    pCollect[3] = position[1]; // armazenou aqui o valor final para ter tudo de posição da COLETA
+                    pCollect[3] = start_pCollectH(button_g, LED_B, button_emerg); // verificar se salvou realmente a posição!
                     // printf("\rValor do H de Coleta: %i\n", pCollect[3]);
                     // printf("\rValor do step_jog: %i\n", step_jog);
                     position[1] = 0;
@@ -446,7 +459,7 @@ int main() {
                     }
 
                     if (step_jog == 7 || step_jog == 12 || step_jog == 17 || step_jog == 22 || step_jog == 28 || step_jog == 33 || step_jog == 38 || step_jog == 43 || step_jog == 48) {
-                        // printf("\rENTROU NO PASSO DE SALVAR XY do frasco!\n");
+                        // printf("\rENTROU NO PASSO DE SALVAR XY d|
                         pPepet[step_jog-7] = position[0];
                         pPepet[step_jog-6] = position[1];
                         switchz = 1;
@@ -475,11 +488,13 @@ int main() {
             }
 
             if (step_jog == 8 || step_jog == 13 || step_jog == 18 || step_jog == 23 || step_jog == 28 || step_jog == 33 || step_jog == 38 || step_jog == 43 || step_jog == 48) {
+                // printf("\rDENTRO NOVAMENTE\n");
                 start_FlaskPositionUpdateZ(position[2]);
             }  
 
             // critério de saída do looping principal
             if (index == n_frascos) {
+                // printf("\rQUEBROU!\n");
                 break;
             }
         }
@@ -487,165 +502,166 @@ int main() {
 
 
 
-
-
-
-    }
-    //**********************************************************REFERENCIAMENTO************************************************************
-
-
-
-
-
-    
-
-
-
-
-
-
+        
     //***********************************************************PIPETAGEM*******************************************************************
     
-    // Volta do ponto do último frasco com parâmetros digitados para o ponto de coleta
-    // printf("\rPpeppet[0]: %i\n", pPepet[4*(n_frascos-1)]);
-    // printf("\rPpeppet[1]: %i\n", pPepet[4*(n_frascos-1)+1]);
-    // printf("\rPpeppet[2]: %i\n", pPepet[4*(n_frascos-1)+2]);
-    // printf("\rPpeppet[3]: %i\n", pPepet[4*(n_frascos-1)+3]);
-    // printf("\rpCollect[0]: %i\n", pCollect[0]);
-    // printf("\rpCollect[1]: %i\n", pCollect[1]);
-    // printf("\rpCollect[2]: %i\n", pCollect[2]);
-    // printf("\rpCollect[3]: %i\n", pCollect[3]);
+        // Volta do ponto do último frasco com parâmetros digitados para o ponto de coleta
+        // printf("\rPpeppet[0]: %i\n", pPepet[4*(n_frascos-1)]);
+        // printf("\rPpeppet[1]: %i\n", pPepet[4*(n_frascos-1)+1]);
+        // printf("\rPpeppet[2]: %i\n", pPepet[4*(n_frascos-1)+2]);
+        // printf("\rPpeppet[3]: %i\n", pPepet[4*(n_frascos-1)+3]);
+        // printf("\rpCollect[0]: %i\n", pCollect[0]);
+        // printf("\rpCollect[1]: %i\n", pCollect[1]);
+        // printf("\rpCollect[2]: %i\n", pCollect[2]);
+        // printf("\rpCollect[3]: %i\n", pCollect[3]);
 
-    // retorno do ultimo frasco para posição de coleta
-    int x = pPepet[4*(n_frascos-1)];
-    int y = pPepet[4*(n_frascos-1)+1];
-    int z = pPepet[4*(n_frascos-1)+2];
+        // retorno do ultimo frasco para posição de coleta
+        int x = pPepet[4*(n_frascos-1)];
+        int y = pPepet[4*(n_frascos-1)+1];
+        int z = pPepet[4*(n_frascos-1)+2];
+        
+        int xCollect = pCollect[0];
+        int yCollect = pCollect[1];
+        int zCollect = pCollect[2];
+
+        // foi colado o valor de (zCollect-2) para se ter a segurança que a pipeta ficará 3 passos do motor acima do frasco de coleta
+        while(z != (zCollect+200)) {
+            UP(&z, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN, &speed);
+        }
+        MOTOR3_EN = 1;
+
+        // retorno para o ponto xy de coleta
+        while(button_emerg == 1) {
+            // printf("\rValor de X: %i\n", x);
+            // printf("\rValor de Y: %i\n", y);
+            RETURN(&x, &y, xCollect, yCollect, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN, &speed);
+
+            // Critérios de parada de motores  
+            if (x == xCollect) {
+                MOTOR2_EN = 1;
+            }
+            if (y == yCollect) {
+                MOTOR1_EN = 1;
+            }
+            if (x == xCollect && y == yCollect) {
+                MOTOR1_EN = 1;
+                MOTOR2_EN = 1;
+                break;
+            }
+        }
+        
+        
+        // INÍCIO DA PIPETAGEM
+        // printf("\rValor de z inicial: %i\n", z);
+        int i = 0;
+        while ((i < n_frascos) && button_emerg == 1) {
+            int xPeppet = pPepet[i+0];
+            int yPeppet = pPepet[i+1];
+            int zPeppet = pPepet[i+2];
+            int hPeppet = pPepet[i+3];
+
+            // LOOPING DA PIPETAGEM PARA CADA FRASCO
+            int j = 1;
+            while (j <= hPeppet && button_emerg == 1) {
+
+                // printf("\rDESCENDO COLETA\n");
+                while ((z > zCollect-300*(i+1)) && button_emerg == 1) {
+                    // printf("\rValor de z: %i\n", z); 
+                    DOWN(&z, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN,  MOTOR3_EN, &speed);
+                }
+                // printf("\rDESCEU E PEGOU!\n");
+                // aciona o relé para coletar o líquido
+                rele1 = 1; 
+                wait(10);
+
+                // printf("\rSUBINDO COLETA\n");
+                // subida, ficando 2 passos acima do z de coleta: (zCollect-2)
+                while (z < zCollect+(300*(i+1)) && button_emerg == 1) {
+                    // printf("\rValor de z: %i\n", z); 
+                    UP(&z, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN,  MOTOR3_EN, &speed);
+                }
+                MOTOR3_EN = 1;
+                
+                // printf("\rINDO EM XY DO FRASCO!\n");
+                // movimentação até o ponto xy do enésimo frasco
+                while (button_emerg == 1) {
+                    // printf("\rValor de X: %i\n", x);
+                    // printf("\rValor de Y: %i\n", y);
+                    TAKE(xPeppet, yPeppet, &x, &y, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN, &speed);
+
+                    // Critérios de parada de motores  
+                    if (x == xPeppet) {
+                        MOTOR2_EN = 1;
+                    }
+                    if (y == yPeppet) {
+                        MOTOR1_EN = 1;
+                    }
+                    if (x == xPeppet && y == yPeppet) {
+                        break;
+                    }
+                }
+                MOTOR1_EN = 1;
+                MOTOR2_EN = 1;
+                // printf("\rVALOR INICIAL DE Z ANTES DA DESCIDA AO FRASCO: %i\n", z);
+                // printf("\rDESCENDO FRASCO\n");
+                // descida para despejar o líquido no enésimo frasco, ficando 2 passos abaixo do z de pipetagem: (zPeppet+2)4
+                while ((z != (zPeppet-200*(i+1))) && button_emerg == 1) {
+                    // printf("\rValor de z: %i\n", z); 
+                    DOWN(&z, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN,  MOTOR3_EN, &speed);
+                }
+                MOTOR3_EN = 1;
+                // aciona o relé para coletar o líquido
+                rele1 = 0; 
+                wait(10);
+
+                // printf("\rSUBINDO FRASCO\n");
+                // subida para retornar para o ponto de coleta, ficando 2 passos acima do z de coleta: (zCollect-2)
+                while ((z != (zCollect+200*(i+1))) && button_emerg == 1) {
+                    UP(&z, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN,  MOTOR3_EN, &speed);
+                }
+                MOTOR3_EN = 1;
+
+                // printf("\rFOI EM XY PARA A COLETA\n");
+                // movimentação até o ponto xy do ponto de coleta
+                while(button_emerg == 1) {
+                    // printf("\rValor de X: %i\n", x);
+                    // printf("\rValor de Y: %i\n", y);
+                    RETURN(&x, &y, xCollect, yCollect, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN, &speed);
+
+                    // Critérios de parada de motores  
+                    if (x == xCollect) {
+                        MOTOR2_EN = 1;
+                    }
+                    if (y == yCollect) {
+                        MOTOR1_EN = 1;
+                    }
+                    if (x == xCollect && y == yCollect) {
+                        break;
+                    }
+                }
+                MOTOR1_EN = 1;
+                MOTOR2_EN = 1;
+
+                j++;
+            }
+            i++;
+        }
+
+
+    }
+
+
+
+
+
     
-    int xCollect = pCollect[0];
-    int yCollect = pCollect[1];
-    int zCollect = pCollect[2];
-
-    // foi colado o valor de (zCollect-2) para se ter a segurança que a pipeta ficará 3 passos do motor acima do frasco de coleta
-    while(z != (zCollect-2) || button_emerg == 1) {
-        UP(&z, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN, &speed);
-    }
-    MOTOR3_EN = 1;
 
 
-    // retorno para o ponto xy de coleta
-    while(button_emerg == 1 || button_emerg == 1) {
-        RETURN(&x, &y, xCollect, yCollect, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN, &speed);
 
-        // Critérios de parada de motores  
-        if (x == xCollect) {
-            MOTOR2_EN = 1;
-        }
-        if (y == yCollect) {
-            MOTOR1_EN = 1;
-        }
-        if (x == xCollect && y == yCollect) {
-            MOTOR1_EN = 1;
-            MOTOR2_EN = 1;
-            break;
-        }
-    }
+
 
 
     
-    // INÍCIO DA PIPETAGEM
-    int i = 0;
-    while (i < n_frascos || button_emerg == 1) {
-        int xPeppet = pPepet[i+0];
-        int yPeppet = pPepet[i+1];
-        int zPeppet = pPepet[i+2];
-        int hPeppet = pPepet[i+3];
-
-        // LOOPING DA PIPETAGEM PARA CADA FRASCO
-        int j = 0;
-        while (j < hPeppet || button_emerg == 1) {
-
-            printf("\rDESCEU E PEGOU!\n");
-            // descida para pegar o líquido descendo 4 passos, ficando 2 passos abaixo do z de coleta: (zCollect+2)
-            int a = 0;
-            while (a < 400 || button_emerg == 1) {
-                DOWN(&z, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN,  MOTOR3_EN, &speed);
-                a++;
-            }
-            
-            // aciona o relé para coletar o líquido
-            rele1 = 1; 
-            wait(10);
-
-            printf("\rSUBIU 1!\n");
-            // subida, ficando 2 passos acima do z de coleta: (zCollect-2)
-            a = 0;
-            for (a < 400 || button_emerg == 1) {
-                UP(&z, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN,  MOTOR3_EN, &speed);
-                a++;
-            }
-            MOTOR3_EN = 1;
-            
-            printf("\rFOI EM XY DO FRASCO!\n");
-            // movimentação até o ponto xy do enésimo frasco
-            while (button_emerg == 1) {
-                TAKE(xPeppet, yPeppet, &x, &y, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN, &speed);
-
-                // Critérios de parada de motores  
-                if (x == xPeppet) {
-                    MOTOR2_EN = 1;
-                }
-                if (y == yPeppet) {
-                    MOTOR1_EN = 1;
-                }
-                if (x == xPeppet && y == yPeppet) {
-                    break;
-                }
-            }
-            MOTOR1_EN = 1;
-            MOTOR2_EN = 1;
-
-            printf("\rDESCEU E DESPEJOU!\n");
-            // descida para despejar o líquido no enésimo frasco, ficando 2 passos abaixo do z de pipetagem: (zPeppet+2)4
-            a = 0
-            for (a < (zPeppet+400) || button_emerg == 1) {
-                DOWN(&z, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN,  MOTOR3_EN, &speed);
-            }
-            MOTOR3_EN = 1;
-            // aciona o relé para coletar o líquido
-            rele1 = 0; 
-            wait(10);
-
-            printf("\rSUBIU 2!\n");
-            // subida para retornar para o ponto de coleta, ficando 2 passos acima do z de coleta: (zCollect-2)
-            a = 0;
-            for (a < (zPeppet-400) || button_emerg == 1) {
-                DOWN(&z, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN,  MOTOR3_EN, &speed);
-            }
-            MOTOR3_EN = 1;
-
-            printf("\rFOI EM XY PARA A COLETA\n");
-            // movimentação até o ponto xy do ponto de coleta
-            while(button_emerg == 1) {
-                RETURN(&x, &y, xCollect, yCollect, MOTOR_CLK, MOTOR1_CW, MOTOR2_CW, MOTOR3_CW, MOTOR1_EN, MOTOR2_EN, MOTOR3_EN, &speed);
-
-                // Critérios de parada de motores  
-                if (x == xCollect) {
-                    MOTOR2_EN = 1;
-                }
-                if (y == yCollect) {
-                    MOTOR1_EN = 1;
-                }
-                if (x == xCollect && y == yCollect) {
-                    break;
-                }
-            }
-            MOTOR1_EN = 1;
-            MOTOR2_EN = 1;
-
-            j++;
-        }
-        i++;
-    }
 
     
     //***********************************************************PIPETAGEM*******************************************************************
