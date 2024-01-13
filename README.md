@@ -6,5 +6,5 @@ O sistema robótico será projetado para realizar a pipetagem automática de lí
 intuitivo com uma Interface Homem-Máquina (IHM) para programar sequências de pipetagem, 
 facilitando o controle do processo
 
-## PIPETADORA
+## DOCUMENTAÇÃO
 
